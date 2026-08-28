@@ -1,0 +1,36 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next
+/out
+
+# production
+/build
+
+# local data — DO NOT COMMIT (contains uploaded data-room documents + sqlite db)
+# NOTE: the -wal/-shm sidecars hold recent transaction data and must be excluded too,
+# otherwise document text committed to the DB can leak even though the .db is ignored.
+/data/*.db
+/data/*.db-wal
+/data/*.db-shm
+/data/uploads/*
+!/data/uploads/.gitkeep
+
+# generated sample documents (reproducible via `npm run generate-samples`)
+/sample-data/*.pdf
+/sample-data/*.docx
+/sample-data/*.xlsx
+
+# env — DO NOT COMMIT (holds ANTHROPIC_API_KEY)
+.env
+.env.local
+
+# local tooling state (leaks local absolute paths; not part of the app)
+/.claude-flow
+/.claude/launch.json
+
+# misc
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts

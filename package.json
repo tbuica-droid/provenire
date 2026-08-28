@@ -1,0 +1,35 @@
+{
+  "name": "provenire",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Provenire — AI-powered M&A due diligence: grounded, cited findings and a draft IC memo from the data room.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "generate-samples": "tsx scripts/generate-samples.ts",
+    "seed": "tsx scripts/seed.ts",
+    "reset-db": "rm -f data/provenire.db && echo 'database removed'"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
+    "better-sqlite3": "^11.8.1",
+    "docx": "^9.1.0",
+    "mammoth": "^1.9.0",
+    "next": "^15.1.6",
+    "pdfjs-dist": "^4.10.38",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "xlsx": "0.18.5"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.7",
+    "@types/pdfkit": "^0.13.9",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "pdfkit": "^0.16.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
