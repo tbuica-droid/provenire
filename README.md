@@ -62,6 +62,15 @@ review. That behaviour is specified in the extraction prompt and enforced in cod
 
 ![Operational peer benchmark](docs/screenshots/operational-benchmark.png)
 
+### The output: a draft IC memo, assembled only from approved findings
+
+The memo opens with a mandatory, verbatim AI-assistance disclaimer, states how
+many reviewed findings it was built from, carries every citation inline, and
+exports to Word. Findings that were never approved cannot appear in it — that
+rule is enforced server-side, not just requested in the prompt.
+
+![Draft Investment Committee memo](docs/screenshots/ic-memo.png)
+
 ---
 
 ## Quick start

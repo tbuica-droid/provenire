@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDeal, latestMemo } from "@/lib/db/repo";
 import { MEMO_DISCLAIMER } from "@/lib/ai/prompts";
+import { renderMemo } from "@/lib/memo-render";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +57,7 @@ export default async function MemoPage({
             Assembled from {memo.finding_ids.length} approved finding(s) ·{" "}
             {new Date(memo.created_at).toLocaleString()}
           </div>
-          <div className="memo">{body}</div>
+          <article className="memo">{renderMemo(body)}</article>
         </>
       )}
     </div>

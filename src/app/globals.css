@@ -578,12 +578,71 @@ a:hover {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 28px 32px;
-  white-space: pre-wrap;
+  padding: 32px 40px 38px;
   font-size: 14px;
   line-height: 1.65;
   color: var(--ink);
   box-shadow: var(--shadow);
+  max-width: 62rem;
+}
+.memo .memo-h1,
+.memo .memo-h2,
+.memo .memo-h3 {
+  color: var(--navy-900);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.memo .memo-h1 {
+  font-size: 21px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+.memo .memo-h2 {
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--navy-700);
+  margin: 26px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.memo .memo-h3 {
+  font-size: 14.5px;
+  font-weight: 700;
+  margin: 18px 0 6px;
+}
+.memo .memo-p {
+  margin: 0 0 11px;
+}
+.memo .memo-list {
+  margin: 0 0 12px;
+  padding-left: 0;
+  list-style: none;
+}
+.memo .memo-list li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 7px;
+}
+.memo .memo-list li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--slate-300);
+}
+.memo .memo-hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 22px 0;
+}
+.memo strong {
+  color: var(--navy-900);
+  font-weight: 650;
 }
 
 .empty {
