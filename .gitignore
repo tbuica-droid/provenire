@@ -27,8 +27,9 @@
 .env.local
 
 # local tooling state (leaks local absolute paths; not part of the app)
-/.claude-flow
-/.claude/launch.json
+# no leading slash: these can be created in any subdirectory
+.claude-flow/
+.claude/launch.json
 
 # misc
 .DS_Store
