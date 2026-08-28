@@ -1,8 +1,8 @@
 # Provenire
 
-**AI-assisted M&A due-diligence platform — MVP.**
+**AI-assisted M&A due-diligence platform (MVP).**
 
-> **Provenire** — from *provenance*: the traceable origin of every claim. That is the
+> **Provenire**, from *provenance*: the traceable origin of every claim. That is the
 > product's whole premise, so the name is used verbatim everywhere. `Provenire` in
 > UI copy, `provenire` in code (package name, folder, routes, `PROVENIRE_*` env
 > vars). Same word, no separate slug.
@@ -15,7 +15,7 @@ approved findings.
 
 The signature differentiator is the **Operational** lens: organizational
 benchmarking (span of control, headcount-to-revenue, cost-per-FTE) that surfaces
-dollar-denominated cost-out **opportunities** a generalist tool would miss — not
+dollar-denominated cost-out **opportunities** a generalist tool would miss, not
 just red flags.
 
 > **All data in this repository is synthetic.** The sample deal ("Project Atlas")
@@ -38,7 +38,7 @@ Create deal → Upload data room → Run analysis (grounded findings)
 ## What it looks like
 
 The screenshots below are **real output** from the pipeline running against the
-synthetic sample deal — not mockups.
+synthetic sample deal. They are not mockups.
 
 ### The findings dashboard
 
@@ -49,7 +49,7 @@ confidence level, a review-gate control, and a citation.
 
 ### The signature analysis: org benchmarking with a quantified opportunity
 
-Most diligence tools only flag risk. This one also quantifies upside — and shows
+Most diligence tools only flag risk. This one also quantifies upside, and shows
 the arithmetic, the peer benchmark, the benchmark's own limitations, and the
 source rows the numbers came from.
 
@@ -58,7 +58,7 @@ source rows the numbers came from.
 Note what the model does here: it states the method inline, sizes the estimate
 conservatively, marks its own confidence as **Low**, and flags itself for human
 review. That behaviour is specified in the extraction prompt and enforced in code
-— see [Credibility mechanisms](#how-the-credibility-mechanisms-are-enforced-not-just-requested).
+(see [Credibility mechanisms](#how-the-credibility-mechanisms-are-enforced-not-just-requested)).
 
 ![Operational peer benchmark](docs/screenshots/operational-benchmark.png)
 
@@ -66,8 +66,8 @@ review. That behaviour is specified in the extraction prompt and enforced in cod
 
 The memo opens with a mandatory, verbatim AI-assistance disclaimer, states how
 many reviewed findings it was built from, carries every citation inline, and
-exports to Word. Findings that were never approved cannot appear in it — that
-rule is enforced server-side, not just requested in the prompt.
+exports to Word. Findings that were never approved cannot appear in it, and that
+rule is enforced server-side rather than merely requested in the prompt.
 
 ![Draft Investment Committee memo](docs/screenshots/ic-memo.png)
 
@@ -85,7 +85,7 @@ cp .env.example .env
 #   then edit .env and set ANTHROPIC_API_KEY=sk-ant-...
 
 # 3. Seed the sample deal "Project Atlas" (generates + ingests 4 sample docs).
-#    This does NOT call the API — it only parses/chunks/stores the documents.
+#    This does NOT call the API. It only parses/chunks/stores the documents.
 npm run seed
 
 # 4. Run
@@ -94,8 +94,8 @@ npm run dev
 ```
 
 Running the analysis and generating the memo require a valid
-`ANTHROPIC_API_KEY` (they call Claude). Everything else — deal creation,
-upload/parse/chunk, the review gate — works without one.
+`ANTHROPIC_API_KEY` (they call Claude). Everything else works without one:
+deal creation, upload/parse/chunk, and the review gate.
 
 > **Node 18.18+ / 20+ recommended.** `better-sqlite3` builds a native binding on
 > install.
@@ -115,14 +115,14 @@ upload/parse/chunk, the review gate — works without one.
 ## What's in the sample deal
 
 `npm run seed` creates **Project Atlas** (a fictional $41.2M-revenue logistics
-SaaS buyout) with four reproducible, format-diverse documents — covering all
+SaaS buyout) with four reproducible, format-diverse documents covering all
 three required file types and all four analysis categories:
 
 | File | Type | Feeds |
 |---|---|---|
 | `Project_Atlas_Financials.xlsx` | XLSX | customer concentration (top-3 = 58%), aggressive EBITDA add-backs, related-party purchases, debt covenant/maturity |
 | `Atlas_MSA_GlobalRetail.docx` | DOCX | change-of-control termination right (§8.2), exclusivity, contractor-IP gap, MFN pricing |
-| `Project_Atlas_Org_and_Headcount.xlsx` | XLSX | **org/HRIS** — headcount, managers, span of control (Eng 2.4), 5 layers, cost/FTE, revenue/FTE → the Operational benchmark |
+| `Project_Atlas_Org_and_Headcount.xlsx` | XLSX | **org/HRIS**: headcount, managers, span of control (Eng 2.4), 5 layers, cost/FTE, revenue/FTE → the Operational benchmark |
 | `Project_Atlas_CIM_Excerpt.pdf` | PDF | moat/pipeline/retention, key-person (CTO), litigation, single-sourced vendor |
 
 All figures are fictional, for demo only.
@@ -136,23 +136,23 @@ All figures are fictional, for demo only.
 | App / API / UI | **Next.js 15 (App Router) + React 19, TypeScript** | One process serves the API routes and the React UI; easy to run locally today and to deploy later. |
 | Database | **SQLite via `better-sqlite3`** | Zero-config, file-based, synchronous. Real relational schema with **normalized finding columns** (see below). |
 | AI | **Anthropic SDK**, model `claude-opus-4-8` (configurable) | Findings use **structured JSON output** (`output_config.format`) so they render as real UI elements; memo is structured text. |
-| Parsing | `pdf-parse` (PDF, per-page), `mammoth` (DOCX, heading-aware), SheetJS `xlsx` (per-sheet/row) | Well-supported; each parser emits **located** text segments so citations carry real page/section/clause/cell references. |
+| Parsing | `pdfjs-dist` (PDF, per-page), `mammoth` (DOCX, heading-aware), SheetJS `xlsx` (per-sheet/row) | Well-supported; each parser emits **located** text segments so citations carry real page/section/clause/cell references. |
 | Retrieval | **TF-IDF lexical by default**, optional local semantic embeddings | Chunk → score per category → top-K. Default is deterministic and offline (demo-safe); set `PROVENIRE_EMBEDDER=local` for `@xenova/transformers` semantic embeddings. Pluggable for a hosted provider later. |
 | Export | `docx` | Real `.docx` IC memo download. |
 
 ### Clean separation (extensible by design)
-- `src/lib/parsing/*` — document processing (one module per format).
-- `src/lib/retrieval/*` — chunking + embedding + per-category retrieval.
-- `src/lib/ai/prompts.ts` — **Parts A & B as verbatim, swappable instruction
+- `src/lib/parsing/*`: document processing (one module per format).
+- `src/lib/retrieval/*`: chunking + embedding + per-category retrieval.
+- `src/lib/ai/prompts.ts`: **Parts A & B as verbatim, swappable instruction
   constants** (the IP), kept out of business logic.
-- `src/lib/ai/analyze.ts` / `memo.ts` — the Part C invocation contract.
-- `src/lib/db/*` — schema + repository.
-- `src/app/*`, `src/components/*` — UI.
+- `src/lib/ai/analyze.ts` / `memo.ts`: the Part C invocation contract.
+- `src/lib/db/*`: schema + repository.
+- `src/app/*`, `src/components/*`: UI.
 
 ### The normalized data asset (deliberate)
-Every finding's structured fields — `category`, `finding_type`, `severity`,
-`benchmark_metric/target_value/peer_range/deviation/source_note`,
-`estimated_value_impact` — are stored in **normalized columns** (`findings`
+Every finding's structured fields (`category`, `finding_type`, `severity`,
+`benchmark_metric/target_value/peer_range/deviation/source_note`, and
+`estimated_value_impact`) are stored in **normalized columns** (`findings`
 table), with evidence in a related `finding_evidence` table. This is what lets a
 **cross-deal benchmarking corpus** be assembled later with plain SQL, without
 re-processing old documents.
@@ -165,7 +165,7 @@ re-processing old documents.
   evidence is validated against the chunks that were actually supplied to that
   call (`analyze.ts → enforceGrounding`). Evidence pointing at an unsupplied
   document is dropped; a finding left with no grounded evidence is **coerced to
-  an Open Question**, flagged, and marked `needs_human_review` — the model
+  an Open Question**, flagged, and marked `needs_human_review`, so the model
   cannot fabricate its way into the dashboard. Ungrounded findings get a visible
   red badge.
 - **Hallucination guardrails are surfaced, not buried.** `confidence` and a
@@ -177,7 +177,7 @@ re-processing old documents.
   output straight to the memo.
 - **The memo disclaimer is mandatory and verbatim.** Part B requires it; the app
   also prepends the exact line as a backstop if the model ever omits it
-  (`memo.ts`), and it renders as a banner + in the `.docx` export.
+  (`memo.ts`), and it renders as a banner and in the `.docx` export.
 
 ---
 
@@ -185,7 +185,7 @@ re-processing old documents.
 
 | Var | Default | Purpose |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | — | **Required** for analysis + memo. |
+| `ANTHROPIC_API_KEY` | none | **Required** for analysis + memo. |
 | `PROVENIRE_ANALYSIS_MODEL` | `claude-opus-4-8` | Model for both calls. Set `claude-sonnet-4-6` for faster/cheaper demos. |
 | `PROVENIRE_THINKING` | `adaptive` | `adaptive` or `off`. |
 | `PROVENIRE_EFFORT` | `high` | `low` / `medium` / `high` / `max`. |
@@ -194,7 +194,7 @@ re-processing old documents.
 
 ---
 
-## Security — what is and isn't implemented
+## Security: what is and isn't implemented
 
 This MVP handles sensitive financial documents, so the boundary matters. Stated
 precisely:
@@ -206,12 +206,12 @@ precisely:
 - `data/` and `.env` are git-ignored, so documents and the API key are not
   committed.
 
-**NOT implemented — required before any real client data touches this**
-- **Encryption at rest** — the SQLite DB and uploaded files are currently stored
+**Not implemented, and required before any real client data touches this**
+- **Encryption at rest.** The SQLite DB and uploaded files are currently stored
   unencrypted on disk.
-- **Authentication / access control / multi-tenant isolation** — there is no
+- **Authentication, access control, and multi-tenant isolation.** There is no
   login; any local user can see any deal.
-- **Audit logging, secrets management, network controls, backup/retention &
+- **Audit logging, secrets management, network controls, and backup/retention/
   deletion workflows.**
 - **A formal compliance program (e.g. SOC 2 Type II)** would need to be
   established before production use.
@@ -228,5 +228,5 @@ local demo, not a system of record for live deals.
   deal's chunks), and the interface is swappable for semantic/hosted embeddings.
 - **`edited` findings count as approved-with-changes** for memo inclusion;
   `pending`/`rejected` never reach the memo.
-- Analysis fans out **one call per category** (4 calls/deal) at high effort —
+- Analysis fans out **one call per category** (4 calls/deal) at high effort, so
   expect a short wait. Lower `PROVENIRE_EFFORT` or use Sonnet for snappier demos.
