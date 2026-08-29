@@ -1624,12 +1624,13 @@
   });
 
   /* ---------- Demo form: validate + submit ----------
-     To receive submissions, create a form at https://formspree.io (free tier),
-     then paste its endpoint below, e.g.:
-       var FORM_ENDPOINT = 'https://formspree.io/f/abcdwxyz';
-     While this is empty the form still validates and confirms, but nothing is
-     transmitted and a warning is logged to the console. */
-  var FORM_ENDPOINT = '';
+     Submissions POST as JSON to Formspree. Done with a plain fetch() rather
+     than the @formspree/ajax CDN library so the page stays a single
+     self-contained file with no external runtime dependency, and keeps its own
+     validation, busy state, and inline confirmation.
+     Set FORM_ENDPOINT to '' to disable sending (the form still validates and
+     confirms locally, and logs a warning). */
+  var FORM_ENDPOINT = 'https://formspree.io/f/xaeynpez';
 
   var form = document.getElementById('demoForm');
   var confirm = document.getElementById('formConfirm');
@@ -1679,11 +1680,14 @@
 
     var payload = {
       name: name.value.trim(),
+      // Formspree uses a field named "email" as the reply-to address.
       email: email.value.trim(),
       firm: firm.value.trim(),
       role: role.value,
       deals: document.getElementById('in-deals').value,
-      dealNote: document.getElementById('in-deal').value.trim()
+      dealNote: document.getElementById('in-deal').value.trim(),
+      // Special field: sets the subject line of the notification email.
+      _subject: 'Provenire demo request: ' + name.value.trim() + ' (' + firm.value.trim() + ')'
     };
 
     function succeed(){
@@ -1716,11 +1720,19 @@
       body: JSON.stringify(payload)
     })
     .then(function(res){
-      if(res.ok){ succeed(); }
-      else { fail('Something went wrong sending that. Please try again, or reach out via GitHub.'); }
+      if(res.ok){ succeed(); return; }
+      // Formspree returns { errors: [{ field, message }, ...] } on rejection.
+      return res.json().then(function(data){
+        var detail = (data && data.errors && data.errors.length)
+          ? data.errors.map(function(e){ return e.message; }).join(' ')
+          : 'Something went wrong sending that.';
+        fail(detail + ' Please try again, or reach out via GitHub.');
+      }).catch(function(){
+        fail('Something went wrong sending that. Please try again, or reach out via GitHub.');
+      });
     })
     .catch(function(){
-      fail('Network error. Please try again, or reach out via GitHub.');
+      fail('Network error. Please check your connection and try again, or reach out via GitHub.');
     });
   });
 
