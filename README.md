@@ -2,6 +2,8 @@
 
 **AI-assisted M&A due-diligence platform (MVP).**
 
+**[Live site](https://tbuica-droid.github.io/provenire/)** · [Source](https://github.com/tbuica-droid/provenire)
+
 > **Provenire**, from *provenance*: the traceable origin of every claim. That is the
 > product's whole premise, so the name is used verbatim everywhere. `Provenire` in
 > UI copy, `provenire` in code (package name, folder, routes, `PROVENIRE_*` env
