@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Provenire — Diligence findings that move the price</title>
+<meta name="description" content="Provenire ingests the full data room and returns a prioritized list of diligence findings — risks and quantified cost-out — each cited to the exact document, page, and clause, plus a first-draft IC memo." />
+<meta name="theme-color" content="#0B1E36" />
+
+<!-- Fonts: loaded progressively; robust system fallbacks below keep this correct offline -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600;700&display=swap" />
+
+<style>
+  /* ===========================================================
+     DESIGN TOKENS
+     =========================================================== */
+  :root{
+    --ink: #0B1E36;          /* near-black navy */
+    --slate: #475569;        /* secondary text */
+    --slate-light: #64748B;
+    --bg: #FFFFFF;
+    --band: #F7F9FC;         /* soft off-white section band */
+    --hairline: #E5E9F0;     /* borders */
+    --navy-band: #0B1E36;    /* hero / footer */
+    --accent: #C2A14D;       /* restrained brass/gold — used sparingly */
+    --accent-deep: #A8893A;  /* accent for AA text-on-white where needed */
+    --on-navy: #E8EDF4;      /* light text on navy */
+    --on-navy-dim: #97A6BC;  /* dimmed light text on navy */
+    --risk: #9A3B3B;         /* muted brick for RISK tag */
+    --maxw: 1120px;
+    --gutter: clamp(20px, 5vw, 40px);
+
+    --serif: "Newsreader", Georgia, "Times New Roman", Times, serif;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    --radius: 10px;
+    --radius-sm: 7px;
+    --shadow-sm: 0 1px 2px rgba(11,30,54,.05), 0 1px 1px rgba(11,30,54,.04);
+    --shadow-md: 0 8px 28px rgba(11,30,54,.08), 0 2px 8px rgba(11,30,54,.05);
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+
+  /* ===========================================================
+     RESET / BASE
+     =========================================================== */
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background:var(--bg);
+    line-height:1.6;
+    font-size:17px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation:none !important; transition:none !important; }
+  }
+  img,svg{ display:block; max-width:100%; }
+  a{ color:inherit; }
+  h1,h2,h3,h4{ font-family:var(--serif); font-weight:500; color:var(--ink); margin:0; line-height:1.15; letter-spacing:-0.01em; }
+  p{ margin:0; }
+  ul{ margin:0; padding:0; list-style:none; }
+  button{ font-family:inherit; }
+
+  /* Visible focus everywhere (a11y) */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+  textarea:focus-visible, summary:focus-visible, [tabindex]:focus-visible{
+    outline:2px solid var(--accent-deep);
+    outline-offset:2px;
+    border-radius:4px;
+  }
+
+  .container{ width:100%; max-width:var(--maxw); margin-inline:auto; padding-inline:var(--gutter); }
+
+  .skip-link{
+    position:absolute; left:-9999px; top:0; z-index:200;
+    background:var(--ink); color:var(--on-navy);
+    padding:12px 18px; border-radius:0 0 8px 0; font-weight:600; font-size:15px;
+  }
+  .skip-link:focus{ left:0; }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  /* ===========================================================
+     WORDMARK  — "Provenire" set plain in the serif; no device.
+     The restraint is the point: the name carries itself.
+     =========================================================== */
+  .wordmark{
+    font-family:var(--serif);
+    font-weight:600;
+    letter-spacing:-0.015em;
+    color:var(--ink);
+    display:inline-flex;
+    align-items:baseline;
+    line-height:1;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .wordmark.on-dark{ color:var(--on-navy); }
+
+  /* ===========================================================
+     BUTTONS / LINKS
+     =========================================================== */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family:var(--sans); font-weight:600; font-size:15px;
+    padding:13px 22px; border-radius:var(--radius-sm);
+    text-decoration:none; cursor:pointer; border:1px solid transparent;
+    transition:background-color .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease);
+    letter-spacing:.005em;
+  }
+  .btn-primary{ background:var(--ink); color:#fff; }
+  .btn-primary:hover{ background:#13294a; }
+  .btn-primary:active{ transform:translateY(1px); }
+  .btn-primary .btn-arrow{ transition:transform .2s var(--ease); }
+  .btn-primary:hover .btn-arrow{ transform:translateX(3px); }
+
+  .btn-on-navy{ background:var(--accent); color:var(--ink); }
+  .btn-on-navy:hover{ background:#cdae5e; }
+
+  .btn-ghost{ background:transparent; color:var(--ink); border-color:var(--hairline); }
+  .btn-ghost:hover{ border-color:var(--ink); }
+
+  .textlink{
+    color:var(--ink); text-decoration:none; font-weight:600; font-size:15px;
+    display:inline-flex; align-items:center; gap:7px;
+    border-bottom:1px solid transparent; transition:border-color .18s var(--ease), color .18s var(--ease);
+  }
+  .textlink .tl-arrow{ transition:transform .2s var(--ease); color:var(--accent-deep); }
+  .textlink:hover{ color:var(--accent-deep); }
+  .textlink:hover .tl-arrow{ transform:translateX(3px); }
+  .textlink.on-navy{ color:var(--on-navy); }
+  .textlink.on-navy:hover{ color:#fff; }
+  .textlink.on-navy .tl-arrow{ color:var(--accent); }
+
+  /* ===========================================================
+     NAV
+     =========================================================== */
+  .nav{
+    position:sticky; top:0; z-index:100;
+    background:rgba(255,255,255,.88);
+    backdrop-filter:saturate(140%) blur(8px);
+    -webkit-backdrop-filter:saturate(140%) blur(8px);
+    border-bottom:1px solid transparent;
+    transition:border-color .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .nav.scrolled{ border-bottom-color:var(--hairline); box-shadow:0 1px 0 rgba(11,30,54,.02); }
+  .nav-inner{ display:flex; align-items:center; justify-content:space-between; height:68px; }
+  .nav .wordmark{ font-size:24px; }
+  .nav-links{ display:flex; align-items:center; gap:30px; }
+  .nav-links a.navlink{
+    text-decoration:none; color:var(--slate); font-weight:500; font-size:15px;
+    transition:color .15s var(--ease); position:relative; padding:4px 0;
+  }
+  .nav-links a.navlink:hover{ color:var(--ink); }
+  .nav-cta-wrap{ display:flex; align-items:center; gap:22px; }
+
+  .nav-toggle{
+    display:none; background:transparent; border:1px solid var(--hairline);
+    border-radius:var(--radius-sm); width:42px; height:40px; cursor:pointer;
+    align-items:center; justify-content:center; color:var(--ink);
+  }
+  .nav-toggle svg{ width:20px; height:20px; }
+
+  .mobile-menu{
+    display:none;
+    border-top:1px solid var(--hairline);
+    background:#fff;
+  }
+  .mobile-menu .container{ padding-top:16px; padding-bottom:22px; }
+  .mobile-menu a.navlink{
+    display:block; padding:13px 0; text-decoration:none; color:var(--ink);
+    font-weight:500; font-size:17px; border-bottom:1px solid var(--hairline);
+  }
+  .mobile-menu .btn{ width:100%; margin-top:18px; }
+
+  @media (max-width:860px){
+    .nav-links, .nav-cta-wrap .btn{ display:none; }
+    .nav-toggle{ display:inline-flex; }
+    .nav-cta-wrap{ gap:0; }
+    .mobile-menu.open{ display:block; }
+  }
+
+  /* ===========================================================
+     SECTION SCAFFOLD
+     =========================================================== */
+  section{ padding-block:clamp(64px, 9vw, 116px); }
+  .band{ background:var(--band); border-block:1px solid var(--hairline); }
+  .navy{ background:var(--navy-band); color:var(--on-navy); }
+  .navy h1,.navy h2,.navy h3{ color:#fff; }
+
+  .eyebrow{
+    font-family:var(--sans);
+    font-weight:600; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--accent-deep); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:""; width:24px; height:1px; background:var(--accent); display:inline-block; }
+  .navy .eyebrow{ color:var(--accent); }
+
+  .section-head{ max-width:760px; }
+  .section-head h2{ font-size:clamp(28px, 4vw, 40px); }
+  .section-head .lede{ color:var(--slate); font-size:clamp(17px,2vw,19px); margin-top:18px; line-height:1.6; }
+  .navy .section-head .lede{ color:var(--on-navy-dim); }
+
+  /* ===========================================================
+     HERO
+     =========================================================== */
+  .hero{
+    background:var(--navy-band);
+    color:var(--on-navy);
+    position:relative;
+    overflow:hidden;
+    padding-block:clamp(78px, 12vw, 150px);
+  }
+  /* faint engineered grid — restrained, not decorative noise */
+  .hero::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.022) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.022) 1px, transparent 1px);
+    background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(120% 90% at 70% 0%, #000 30%, transparent 78%);
+    mask-image:radial-gradient(120% 90% at 70% 0%, #000 30%, transparent 78%);
+  }
+  .hero .container{ position:relative; }
+  .hero-tag{
+    display:inline-flex; align-items:center; gap:9px;
+    border:1px solid rgba(232,237,244,.16); border-radius:100px;
+    padding:7px 15px 7px 13px; font-size:13px; color:var(--on-navy-dim);
+    font-weight:500; margin-bottom:30px; letter-spacing:.01em;
+  }
+  .hero-tag .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); display:inline-block; }
+  .hero h1{
+    color:#fff; font-size:clamp(34px, 6vw, 62px); line-height:1.05;
+    letter-spacing:-0.022em; max-width:16ch; font-weight:500;
+  }
+  .hero h1 .accent-line{ color:#fff; }
+  .hero .subhead{
+    color:var(--on-navy-dim); font-size:clamp(17px, 2.1vw, 20px);
+    line-height:1.62; max-width:62ch; margin-top:28px; font-weight:400;
+  }
+  .hero .subhead strong{ color:var(--on-navy); font-weight:500; }
+  .hero-actions{ display:flex; flex-wrap:wrap; align-items:center; gap:24px; margin-top:40px; }
+  .hero-actions .btn{ font-size:16px; padding:15px 26px; }
+
+  /* ===========================================================
+     VALUE PROP STRIP
+     =========================================================== */
+  .valueprop{ padding-block:clamp(44px,6vw,64px); }
+  .valueprop p{
+    font-family:var(--serif); font-weight:400;
+    font-size:clamp(20px, 2.6vw, 27px); line-height:1.42; color:var(--ink);
+    max-width:23ch; letter-spacing:-0.01em;
+  }
+  .valueprop .vp-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:clamp(28px,5vw,72px); align-items:center; }
+  .valueprop .vp-aside{ color:var(--slate); font-size:16px; line-height:1.65; max-width:46ch; }
+  .valueprop .vp-aside .accent-num{ color:var(--accent-deep); font-weight:600; }
+  @media (max-width:760px){ .valueprop .vp-grid{ grid-template-columns:1fr; gap:24px; } }
+
+  /* ===========================================================
+     PROBLEM
+     =========================================================== */
+  .problem-grid{ display:grid; grid-template-columns:1fr; gap:clamp(40px,5vw,64px); margin-top:54px; }
+  .problem-callout{
+    border-left:2px solid var(--accent);
+    padding:6px 0 6px 26px;
+    max-width:760px;
+  }
+  .problem-callout p{ font-family:var(--serif); font-size:clamp(21px,3vw,30px); line-height:1.32; color:var(--ink); letter-spacing:-0.01em; }
+  .problem-callout .src{ font-family:var(--sans); font-size:13.5px; color:var(--slate-light); margin-top:14px; font-style:normal; }
+
+  .shift-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(16px,2.4vw,28px); }
+  .shift-card{
+    background:#fff; border:1px solid var(--hairline); border-radius:var(--radius);
+    padding:26px 24px; box-shadow:var(--shadow-sm);
+  }
+  .shift-card .when{ font-size:12.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-deep); margin-bottom:12px; }
+  .shift-card h3{ font-size:18px; margin-bottom:10px; line-height:1.25; }
+  .shift-card p{ color:var(--slate); font-size:15px; line-height:1.6; }
+  .shift-card p strong{ color:var(--ink); font-weight:600; }
+
+  .problem-land{
+    margin-top:8px;
+    background:var(--ink); color:#fff; border-radius:var(--radius);
+    padding:clamp(30px,4vw,46px);
+    display:flex; align-items:center; gap:22px; flex-wrap:wrap;
+  }
+  .problem-land .pl-text{ font-family:var(--serif); font-size:clamp(21px,3vw,30px); line-height:1.3; letter-spacing:-0.01em; max-width:24ch; }
+  .problem-land .pl-text .em{ color:var(--accent); }
+  .problem-land .pl-sub{ color:var(--on-navy-dim); font-family:var(--sans); font-size:15.5px; line-height:1.6; max-width:40ch; }
+  @media (max-width:760px){ .shift-row{ grid-template-columns:1fr; } }
+
+  /* ===========================================================
+     HOW IT WORKS
+     =========================================================== */
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(20px,3vw,34px); margin-top:56px; counter-reset:step; }
+  .step{ position:relative; }
+  .step .step-top{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+  .step .step-ico{
+    width:50px; height:50px; flex:none; border-radius:12px;
+    background:var(--ink); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step .step-ico svg{ width:24px; height:24px; }
+  .step .step-num{
+    font-family:var(--serif); font-size:15px; font-weight:600; color:var(--accent-deep);
+    letter-spacing:.04em;
+  }
+  .step h3{ font-size:21px; margin-bottom:12px; }
+  .step p{ color:var(--slate); font-size:15.5px; line-height:1.62; }
+  .step p .hl{ color:var(--ink); font-weight:600; }
+  .step .step-detail{ margin-top:16px; display:flex; flex-direction:column; gap:9px; }
+  .step .step-detail li{ display:flex; gap:10px; align-items:flex-start; color:var(--slate); font-size:14.5px; line-height:1.5; }
+  .step .step-detail li svg{ width:16px; height:16px; flex:none; margin-top:3px; color:var(--accent-deep); }
+  @media (max-width:860px){ .steps{ grid-template-columns:1fr; gap:34px; } }
+
+  /* ===========================================================
+     BENEFITS / PILLARS
+     =========================================================== */
+  .pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(20px,2.6vw,30px); margin-top:56px; }
+  .pillar{
+    background:#fff; border:1px solid var(--hairline); border-radius:var(--radius);
+    padding:30px 28px; box-shadow:var(--shadow-sm);
+    transition:box-shadow .25s var(--ease), transform .25s var(--ease), border-color .25s var(--ease);
+  }
+  .pillar:hover{ box-shadow:var(--shadow-md); transform:translateY(-3px); border-color:#d8deea; }
+  .pillar .p-ico{ width:42px; height:42px; color:var(--accent-deep); margin-bottom:20px; }
+  .pillar .p-ico svg{ width:42px; height:42px; }
+  .pillar h3{ font-size:20px; line-height:1.25; margin-bottom:13px; }
+  .pillar p{ color:var(--slate); font-size:15.5px; line-height:1.62; }
+  .pillar p strong{ color:var(--ink); font-weight:600; }
+  @media (max-width:860px){ .pillars{ grid-template-columns:1fr; } }
+
+  /* ---- Finding cards ---- */
+  .findings-wrap{ margin-top:clamp(48px,6vw,72px); }
+  .findings-head{ display:flex; align-items:baseline; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-bottom:26px; }
+  .findings-head h3{ font-size:clamp(22px,3vw,28px); }
+  .illustrative-flag{
+    font-size:11.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--slate-light); border:1px dashed var(--hairline); border-radius:100px;
+    padding:6px 13px; white-space:nowrap; background:#fff;
+  }
+
+  .findings-grid{ display:grid; grid-template-columns:1.55fr 1fr; gap:24px; align-items:start; }
+  @media (max-width:860px){ .findings-grid{ grid-template-columns:1fr; } }
+
+  .finding{
+    background:#fff; border:1px solid var(--hairline); border-radius:var(--radius);
+    box-shadow:var(--shadow-md); overflow:hidden;
+  }
+  .finding.secondary{ box-shadow:var(--shadow-sm); }
+  .finding-top{ display:flex; align-items:center; gap:10px; padding:18px 24px; border-bottom:1px solid var(--hairline); flex-wrap:wrap; }
+  .tag{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:11.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    padding:5px 11px; border-radius:6px;
+  }
+  .tag-opp{ color:#5c4a16; background:rgba(194,161,77,.16); border:1px solid rgba(194,161,77,.4); }
+  .tag-opp .tdot{ width:7px; height:7px; border-radius:50%; background:var(--accent); }
+  .tag-risk{ color:#fff; background:var(--risk); }
+  .tag-risk .tdot{ width:7px; height:7px; border-radius:50%; background:#e7b6b6; }
+  .mat{
+    font-size:11.5px; font-weight:600; letter-spacing:.06em; color:var(--slate);
+    margin-left:auto; display:inline-flex; align-items:center; gap:8px;
+  }
+  .mat .mat-label{ text-transform:uppercase; letter-spacing:.1em; color:var(--slate-light); }
+  .mat .mat-bars{ display:inline-flex; gap:3px; align-items:flex-end; }
+  .mat .mat-bars i{ width:4px; background:var(--hairline); border-radius:1px; display:inline-block; }
+  .mat .mat-bars i:nth-child(1){ height:7px; }
+  .mat .mat-bars i:nth-child(2){ height:11px; }
+  .mat .mat-bars i:nth-child(3){ height:15px; }
+  .mat.high .mat-bars i{ background:var(--ink); }
+  .mat.high .mat-value{ color:var(--ink); font-weight:700; }
+
+  .finding-body{ padding:22px 24px 24px; }
+  .finding-body h4{ font-size:20px; line-height:1.28; margin-bottom:12px; }
+  .finding.secondary .finding-body h4{ font-size:17.5px; }
+  .finding-body .f-desc{ color:var(--slate); font-size:15px; line-height:1.62; }
+  .finding-body .f-desc .num{ color:var(--ink); font-weight:600; }
+
+  /* mini benchmark bar for the opportunity card */
+  .bench{ margin:20px 0 4px; display:flex; flex-direction:column; gap:13px; }
+  .bench-row{ display:grid; grid-template-columns:118px 1fr auto; gap:12px; align-items:center; font-size:13px; }
+  .bench-row .bl{ color:var(--slate); }
+  .bench-track{ height:8px; background:var(--band); border:1px solid var(--hairline); border-radius:100px; overflow:hidden; position:relative; }
+  .bench-fill{ height:100%; border-radius:100px; }
+  .bench-fill.target{ background:var(--ink); }
+  .bench-fill.peer{ background:var(--accent); }
+  .bench-row .bv{ font-variant-numeric:tabular-nums; font-weight:600; color:var(--ink); font-size:13px; white-space:nowrap; }
+
+  .impact{
+    margin-top:22px; background:var(--ink); border-radius:var(--radius-sm);
+    padding:18px 20px; color:#fff;
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  }
+  .impact .imp-label{ font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--on-navy-dim); font-weight:600; }
+  .impact .imp-value{ font-family:var(--serif); font-size:clamp(24px,3.4vw,32px); font-weight:600; color:#fff; letter-spacing:-0.01em; line-height:1; }
+  .impact .imp-value .accent{ color:var(--accent); }
+  .impact .imp-sub{ font-size:13px; color:var(--on-navy-dim); margin-left:auto; }
+
+  .impact.secondary{ background:var(--band); border:1px solid var(--hairline); }
+  .impact.secondary .imp-label{ color:var(--slate-light); }
+  .impact.secondary .imp-value{ color:var(--ink); font-size:clamp(17px,2.4vw,20px); }
+
+  /* source chip */
+  .source-chip{
+    margin-top:18px;
+    display:flex; align-items:center; gap:12px;
+    width:100%; text-align:left;
+    background:var(--band); border:1px solid var(--hairline); border-radius:var(--radius-sm);
+    padding:12px 14px; cursor:pointer; color:var(--ink);
+    transition:border-color .18s var(--ease), background-color .18s var(--ease), box-shadow .18s var(--ease);
+    font-family:var(--sans);
+  }
+  .source-chip:hover{ border-color:var(--accent); background:#fff; box-shadow:var(--shadow-sm); }
+  .source-chip .sc-ico{ width:30px; height:30px; flex:none; border-radius:7px; background:#fff; border:1px solid var(--hairline); display:flex; align-items:center; justify-content:center; color:var(--accent-deep); }
+  .source-chip .sc-ico svg{ width:16px; height:16px; }
+  .source-chip .sc-text{ min-width:0; }
+  .source-chip .sc-label{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-light); font-weight:600; }
+  .source-chip .sc-ref{ font-size:13px; color:var(--ink); line-height:1.4; font-variant-numeric:tabular-nums; }
+  .source-chip .sc-ref code{ font-family:var(--sans); }
+  .source-chip .sc-jump{ margin-left:auto; font-size:12.5px; font-weight:600; color:var(--accent-deep); white-space:nowrap; display:inline-flex; align-items:center; gap:5px; flex:none; }
+  .source-chip .sc-jump svg{ width:13px; height:13px; }
+  .source-chip[aria-pressed="true"] .sc-jump-text::after{ content:" · opened"; color:var(--slate-light); font-weight:500; }
+
+  /* ---- Positioning map ---- */
+  .map-wrap{ margin-top:clamp(48px,6vw,80px); }
+  .map-head{ max-width:640px; margin-bottom:30px; }
+  .map-head h3{ font-size:clamp(22px,3vw,28px); margin-bottom:14px; }
+  .map-head p{ color:var(--slate); font-size:16px; line-height:1.6; }
+  .map-shell{
+    background:#fff; border:1px solid var(--hairline); border-radius:var(--radius);
+    padding:clamp(16px,3vw,30px); box-shadow:var(--shadow-sm);
+  }
+  .map-shell svg{ width:100%; height:auto; }
+  .map-caption{ margin-top:18px; color:var(--slate); font-size:14px; line-height:1.6; text-align:center; max-width:62ch; margin-inline:auto; }
+  .map-caption strong{ color:var(--ink); font-weight:600; }
+
+  /* SVG map text styles */
+  .map-axis-label{ font-family:var(--sans); font-size:13px; font-weight:600; fill:var(--ink); }
+  .map-axis-end{ font-family:var(--sans); font-size:11.5px; fill:var(--slate-light); font-weight:500; }
+  .map-node-label{ font-family:var(--sans); font-size:13px; font-weight:600; fill:var(--slate); }
+  .map-node-label.mai{ fill:var(--ink); font-weight:700; }
+  .map-grid-line{ stroke:var(--hairline); stroke-width:1; }
+  .map-axis-line{ stroke:#cbd3e0; stroke-width:1.5; }
+  .map-dot{ fill:var(--slate-light); }
+  .map-dot.mai{ fill:var(--accent); }
+  .map-mai-ring{ fill:none; stroke:var(--accent); stroke-width:1.5; opacity:.5; }
+  .map-quadrant-note{ font-family:var(--sans); font-size:10.5px; fill:#aab4c4; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* ===========================================================
+     OBJECTIONS / ACCORDION
+     =========================================================== */
+  .accordion{ margin-top:48px; max-width:880px; }
+  .acc-item{ border:1px solid var(--hairline); border-radius:var(--radius); margin-bottom:14px; background:#fff; overflow:hidden; transition:border-color .2s var(--ease), box-shadow .2s var(--ease); }
+  .acc-item:hover{ border-color:#d8deea; }
+  .acc-item.featured{ border-color:var(--ink); box-shadow:var(--shadow-md); }
+  .acc-item.featured .acc-trigger{ background:var(--ink); }
+  .acc-item.featured .acc-q{ color:#fff; }
+  .acc-item.featured .acc-icon{ color:var(--accent); border-color:rgba(255,255,255,.22); }
+  .acc-item.featured .acc-feat-tag{ display:inline-flex; }
+  .acc-trigger{
+    width:100%; background:transparent; border:0; cursor:pointer;
+    display:flex; align-items:center; gap:16px; text-align:left;
+    padding:21px 24px; transition:background-color .18s var(--ease);
+  }
+  .acc-item:not(.featured) .acc-trigger:hover{ background:var(--band); }
+  .acc-q{ font-family:var(--serif); font-size:clamp(17px,2.2vw,20px); font-weight:500; color:var(--ink); flex:1; line-height:1.3; }
+  .acc-feat-tag{ display:none; font-family:var(--sans); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); border:1px solid rgba(194,161,77,.5); border-radius:100px; padding:4px 10px; }
+  .acc-icon{
+    width:34px; height:34px; flex:none; border:1px solid var(--hairline); border-radius:8px;
+    display:flex; align-items:center; justify-content:center; color:var(--slate);
+    transition:transform .25s var(--ease), color .2s var(--ease);
+  }
+  .acc-icon svg{ width:16px; height:16px; }
+  .acc-trigger[aria-expanded="true"] .acc-icon{ transform:rotate(45deg); color:var(--accent-deep); }
+  .acc-item.featured .acc-trigger[aria-expanded="true"] .acc-icon{ color:var(--accent); }
+  .acc-panel{
+    overflow:hidden; max-height:0;
+    transition:max-height .3s var(--ease);
+  }
+  .acc-panel-inner{ padding:0 24px 24px; }
+  .acc-item.featured .acc-panel-inner{ padding-top:6px; }
+  .acc-panel p{ color:var(--slate); font-size:15.5px; line-height:1.66; }
+  .acc-item.featured .acc-panel{ background:var(--ink); }
+  .acc-item.featured .acc-panel p{ color:var(--on-navy-dim); }
+  .acc-item.featured .acc-panel p strong{ color:#fff; font-weight:600; }
+  .acc-panel p strong{ color:var(--ink); font-weight:600; }
+  @media (prefers-reduced-motion: reduce){ .acc-panel{ transition:none; } }
+
+  /* ===========================================================
+     SECURITY
+     =========================================================== */
+  .sec-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(18px,2.4vw,26px); margin-top:52px; }
+  .sec-card{
+    border:1px solid rgba(232,237,244,.14); border-radius:var(--radius);
+    padding:28px 26px; background:rgba(255,255,255,.02);
+  }
+  .sec-card .s-ico{ width:40px; height:40px; color:var(--accent); margin-bottom:18px; }
+  .sec-card .s-ico svg{ width:40px; height:40px; }
+  .sec-card h3{ color:#fff; font-size:18.5px; margin-bottom:11px; line-height:1.3; }
+  .sec-card p{ color:var(--on-navy-dim); font-size:15px; line-height:1.62; }
+  .sec-card p strong{ color:var(--on-navy); font-weight:600; }
+  .sec-note{ margin-top:34px; color:var(--on-navy-dim); font-size:13.5px; line-height:1.6; max-width:70ch; border-top:1px solid rgba(232,237,244,.12); padding-top:24px; }
+  @media (max-width:760px){ .sec-grid{ grid-template-columns:1fr; } }
+  /* ===========================================================
+     FOUNDER + CONTACT / FORM
+     =========================================================== */
+  .contact-grid{ display:grid; grid-template-columns:0.85fr 1.15fr; gap:clamp(32px,5vw,68px); align-items:start; margin-top:52px; }
+  @media (max-width:880px){ .contact-grid{ grid-template-columns:1fr; gap:44px; } }
+
+  .founder-card{ }
+  .founder-id{ display:flex; align-items:center; gap:16px; margin-bottom:22px; }
+  .founder-avatar{
+    width:60px; height:60px; flex:none; border-radius:50%;
+    background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-weight:600; font-size:22px; letter-spacing:.01em;
+  }
+  .founder-id .f-name{ font-family:var(--serif); font-size:20px; font-weight:600; color:var(--ink); line-height:1.2; }
+  .founder-id .f-title{ font-size:14px; color:var(--slate); margin-top:3px; }
+  .founder-bio{ color:var(--slate); font-size:15.5px; line-height:1.64; }
+  .founder-bio .placeholder-text{ color:var(--slate-light); font-style:italic; }
+  .founder-contact{ margin-top:24px; padding-top:24px; border-top:1px solid var(--hairline); }
+  .founder-contact .fc-label{ font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-light); font-weight:600; margin-bottom:6px; }
+  .founder-contact a{ color:var(--ink); text-decoration:none; font-weight:600; font-size:16px; border-bottom:1px solid var(--hairline); transition:border-color .18s var(--ease); }
+  .founder-contact a:hover{ border-color:var(--accent); }
+
+  /* form */
+  .form-card{
+    background:#fff; border:1px solid var(--hairline); border-radius:var(--radius);
+    padding:clamp(26px,4vw,40px); box-shadow:var(--shadow-md);
+  }
+  .form-intro{ color:var(--slate); font-size:15.5px; line-height:1.6; margin-bottom:26px; }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:560px){ .field-row{ grid-template-columns:1fr; } }
+  .field{ margin-bottom:18px; display:flex; flex-direction:column; }
+  .field label{ font-size:13.5px; font-weight:600; color:var(--ink); margin-bottom:7px; }
+  .field label .req{ color:var(--accent-deep); }
+  .field input, .field select, .field textarea{
+    font-family:var(--sans); font-size:15.5px; color:var(--ink);
+    padding:12px 14px; border:1px solid var(--hairline); border-radius:var(--radius-sm);
+    background:#fff; width:100%; transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
+  }
+  .field input::placeholder, .field textarea::placeholder{ color:#9aa6b6; }
+  .field input:hover, .field select:hover, .field textarea:hover{ border-color:#c8d0dd; }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none; border-color:var(--accent-deep); box-shadow:0 0 0 3px rgba(194,161,77,.15);
+  }
+  .field textarea{ resize:vertical; min-height:96px; }
+  .field select{ appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23475569' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center; padding-right:38px; }
+  .field .err-msg{ color:var(--risk); font-size:12.5px; margin-top:6px; display:none; font-weight:500; }
+  .field.invalid input, .field.invalid select{ border-color:var(--risk); }
+  .field.invalid .err-msg{ display:block; }
+  .form-submit-error{
+    display:none; margin:0 0 12px;
+    background:#fdf2f2; border:1px solid #e9c6c6; color:var(--risk);
+    border-radius:var(--radius-sm); padding:10px 13px; font-size:13.5px; line-height:1.5;
+  }
+  .form-card .btn-primary{ width:100%; margin-top:8px; font-size:16px; padding:15px; }
+  .form-card .btn-primary[aria-busy="true"]{ opacity:.6; cursor:progress; }
+  .form-foot{ margin-top:16px; font-size:12.5px; color:var(--slate-light); line-height:1.55; text-align:center; }
+
+  /* confirmation */
+  .form-confirm{ display:none; text-align:center; padding:18px 0 8px; }
+  .form-confirm.show{ display:block; }
+  .form-confirm .fc-check{
+    width:58px; height:58px; border-radius:50%; background:rgba(194,161,77,.14);
+    border:1px solid rgba(194,161,77,.4); color:var(--accent-deep);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 22px;
+  }
+  .form-confirm .fc-check svg{ width:26px; height:26px; }
+  .form-confirm h3{ font-size:22px; margin-bottom:12px; }
+  .form-confirm p{ color:var(--slate); font-size:16px; line-height:1.6; max-width:42ch; margin:0 auto; }
+
+  /* ===========================================================
+     FOOTER
+     =========================================================== */
+  footer{ background:var(--navy-band); color:var(--on-navy-dim); padding-block:clamp(48px,6vw,72px); }
+  .footer-top{ display:flex; justify-content:space-between; gap:32px; flex-wrap:wrap; align-items:flex-start; }
+  footer .wordmark{ font-size:26px; }
+  .footer-tag{ color:var(--on-navy-dim); font-size:15px; line-height:1.55; margin-top:16px; max-width:34ch; }
+  .footer-right{ display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
+  .footer-right a{ color:var(--on-navy); text-decoration:none; font-size:15px; border-bottom:1px solid transparent; transition:border-color .18s var(--ease); }
+  .footer-right a:hover{ border-bottom-color:var(--accent); }
+  .footer-right .fr-label{ font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--on-navy-dim); font-weight:600; }
+  .footer-bottom{
+    margin-top:40px; padding-top:24px; border-top:1px solid rgba(232,237,244,.12);
+    display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    font-size:13px; color:var(--on-navy-dim);
+  }
+  .footer-bottom .fb-note{ max-width:60ch; line-height:1.55; }
+
+  /* ===========================================================
+     OUTPUTS — IC MEMO HERO + ARC TIMELINE  (in How it works)
+     =========================================================== */
+  .outputs{ margin-top:clamp(54px,7vw,82px); }
+  .outputs-head{ display:flex; align-items:baseline; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-bottom:28px; }
+  .outputs-head h3{ font-size:clamp(22px,3vw,28px); max-width:26ch; }
+  .outputs-grid{ display:grid; grid-template-columns:1.12fr .88fr; gap:clamp(22px,3vw,32px); align-items:stretch; }
+  @media (max-width:860px){ .outputs-grid{ grid-template-columns:1fr; } }
+
+  .memo-hero{ background:#fff; border:1px solid var(--hairline); border-radius:var(--radius); box-shadow:var(--shadow-md); overflow:hidden; display:flex; flex-direction:column; }
+  .memo-hero .memo-bar{ height:6px; background:var(--ink); }
+  .memo-inner{ padding:clamp(22px,3vw,30px); display:flex; flex-direction:column; gap:18px; flex:1; }
+  .memo-doc-head{ display:flex; align-items:flex-start; gap:14px; }
+  .memo-doc-head .md-ico{ width:42px; height:42px; flex:none; border-radius:9px; background:var(--band); border:1px solid var(--hairline); display:flex; align-items:center; justify-content:center; color:var(--accent-deep); }
+  .memo-doc-head .md-ico svg{ width:22px; height:22px; }
+  .memo-doc-head .md-kicker{ font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-light); font-weight:600; }
+  .memo-doc-head h4{ font-size:20px; line-height:1.25; margin-top:3px; }
+  .memo-chip{ display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-deep); border:1px solid rgba(194,161,77,.45); border-radius:100px; padding:4px 10px; margin-left:auto; flex:none; align-self:flex-start; }
+  .memo-chip .tdot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .memo-sections{ display:flex; flex-direction:column; border-top:1px solid var(--hairline); }
+  .memo-sections li{ display:flex; align-items:center; gap:12px; padding:12px 2px; border-bottom:1px solid var(--hairline); font-size:15px; color:var(--ink); }
+  .memo-sections li .ms-n{ font-family:var(--serif); font-size:13px; font-weight:600; color:var(--accent-deep); width:18px; flex:none; }
+  .memo-sections li .ms-cite{ margin-left:auto; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--slate-light); font-weight:600; white-space:nowrap; }
+  .memo-foot{ display:flex; align-items:flex-start; gap:10px; color:var(--slate); font-size:13.5px; line-height:1.55; }
+  .memo-foot svg{ width:16px; height:16px; flex:none; margin-top:2px; color:var(--accent-deep); }
+
+  .arc{ background:var(--band); border:1px solid var(--hairline); border-radius:var(--radius); padding:clamp(22px,3vw,28px); display:flex; flex-direction:column; }
+  .arc h4{ font-size:16px; margin-bottom:5px; }
+  .arc .arc-sub{ color:var(--slate); font-size:13.5px; line-height:1.55; margin-bottom:22px; }
+  .arc-steps{ display:flex; flex-direction:column; }
+  .arc-step{ display:flex; gap:15px; }
+  .arc-rail{ display:flex; flex-direction:column; align-items:center; flex:none; width:16px; align-self:stretch; }
+  .arc-node{ width:14px; height:14px; border-radius:50%; background:var(--ink); border:2px solid var(--ink); flex:none; margin-top:3px; }
+  .arc-step.is-hero .arc-node{ background:var(--accent); border-color:var(--accent); box-shadow:0 0 0 4px rgba(194,161,77,.2); }
+  .arc-step.is-next .arc-node{ background:#fff; border-color:#c4cdda; border-style:dashed; }
+  .arc-connector{ width:2px; flex:1; background:var(--hairline); margin-top:4px; min-height:16px; }
+  .arc-connector.dashed{ background:transparent; border-left:2px dashed #c4cdda; }
+  .arc-body{ padding-bottom:20px; }
+  .arc-step:last-child .arc-body{ padding-bottom:0; }
+  .arc-body .arc-k{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .arc-body h5{ font-family:var(--serif); font-weight:600; font-size:16px; color:var(--ink); margin:0; }
+  .arc-body p{ color:var(--slate); font-size:13.5px; line-height:1.5; margin-top:4px; }
+  .arc-step.is-next h5{ color:var(--slate); }
+  .arc-tag{ font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; padding:3px 9px; border-radius:100px; }
+  .arc-tag.live{ color:var(--accent-deep); background:rgba(194,161,77,.14); border:1px solid rgba(194,161,77,.4); }
+  .arc-tag.next{ color:var(--slate-light); background:#fff; border:1px dashed #c4cdda; }
+
+  /* ===========================================================
+     DEFENSIBLE VALUATION RANGE  (in Benefits)
+     =========================================================== */
+  .valrange{ margin-top:24px; background:#fff; border:1px solid var(--hairline); border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:clamp(22px,3.4vw,32px); }
+  .valrange-head{ display:flex; align-items:baseline; gap:14px; justify-content:space-between; flex-wrap:wrap; margin-bottom:12px; }
+  .valrange-head h4{ font-size:clamp(19px,2.4vw,22px); line-height:1.25; max-width:32ch; }
+  .valrange .vr-desc{ color:var(--slate); font-size:15px; line-height:1.62; max-width:66ch; }
+  .valrange .vr-desc strong{ color:var(--ink); font-weight:600; }
+  .vr-bar-wrap{ margin-top:26px; }
+  .vr-scale{ position:relative; height:34px; }
+  .vr-track{ position:absolute; left:0; right:0; top:13px; height:8px; background:var(--band); border:1px solid var(--hairline); border-radius:100px; }
+  .vr-band{ position:absolute; top:13px; height:8px; background:var(--accent); border-radius:100px; }
+  .vr-ask{ position:absolute; top:3px; width:2px; height:28px; background:var(--ink); border-radius:1px; }
+  .vr-legend{ display:flex; gap:14px 28px; flex-wrap:wrap; margin-top:18px; font-size:13.5px; color:var(--slate); }
+  .vr-legend .vrl{ display:inline-flex; align-items:center; gap:9px; }
+  .vr-legend .vrl strong{ color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums; }
+  .vr-legend .sw{ display:inline-block; flex:none; }
+  .vr-legend .sw.band{ width:16px; height:8px; border-radius:100px; background:var(--accent); }
+  .vr-legend .sw.ask{ width:2px; height:15px; background:var(--ink); }
+  .vr-note{ margin-top:20px; padding-top:18px; border-top:1px solid var(--hairline); color:var(--slate); font-size:13.5px; line-height:1.6; }
+  .vr-note strong{ color:var(--ink); font-weight:600; }
+
+  /* ===========================================================
+     ROADMAP / WHAT'S NEXT
+     =========================================================== */
+  .rm-legend{ display:flex; gap:24px; flex-wrap:wrap; margin-top:4px; margin-bottom:36px; font-size:13.5px; color:var(--slate); }
+  .rm-legend .rl{ display:inline-flex; align-items:center; gap:10px; }
+  .rm-legend .swatch{ width:30px; height:18px; border-radius:6px; flex:none; }
+  .rm-legend .swatch.live{ background:#fff; border:1px solid var(--hairline); position:relative; }
+  .rm-legend .swatch.live::after{ content:""; position:absolute; left:6px; top:6px; width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .rm-legend .swatch.next{ background:var(--band); border:1px dashed #c4cdda; }
+  .rm-group-label{ font-size:12.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-light); margin:0 0 18px; display:flex; align-items:center; gap:12px; }
+  .rm-group-label::after{ content:""; height:1px; background:var(--hairline); flex:1; }
+  .rm-now{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(16px,2.4vw,24px); margin-bottom:clamp(36px,5vw,54px); }
+  .rm-next{ display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(16px,2.4vw,24px); }
+  @media (max-width:760px){ .rm-now,.rm-next{ grid-template-columns:1fr; } }
+  .rm-card{ border-radius:var(--radius); padding:24px 22px; }
+  .rm-card.now{ background:#fff; border:1px solid var(--hairline); box-shadow:var(--shadow-sm); }
+  .rm-card.next{ background:var(--band); border:1px dashed #c4cdda; }
+  .rm-status{ display:inline-flex; align-items:center; gap:7px; font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; padding:4px 11px; border-radius:100px; margin-bottom:14px; }
+  .rm-card.now .rm-status{ color:var(--accent-deep); background:rgba(194,161,77,.14); border:1px solid rgba(194,161,77,.4); }
+  .rm-card.now .rm-status .tdot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .rm-card.next .rm-status{ color:var(--slate-light); background:#fff; border:1px dashed #c4cdda; }
+  .rm-card h4{ font-size:17.5px; line-height:1.3; margin-bottom:9px; }
+  .rm-card.next h4{ color:var(--slate); }
+  .rm-card p{ color:var(--slate); font-size:14.5px; line-height:1.6; }
+  .rm-card p strong{ color:var(--ink); font-weight:600; }
+
+  /* WHAT Provenire DOESN'T DO — boundary / trust block */
+  .guardrails{ margin-top:clamp(42px,5vw,62px); background:var(--ink); color:var(--on-navy); border-radius:var(--radius); padding:clamp(30px,4vw,48px); }
+  .guardrails .g-head{ max-width:62ch; }
+  .guardrails .g-eyebrow{ font-size:12.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+  .guardrails h3{ color:#fff; font-size:clamp(21px,2.8vw,26px); }
+  .guardrails .g-sub{ color:var(--on-navy-dim); font-size:15.5px; line-height:1.62; margin-top:14px; }
+  .guardrails-list{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px 26px; margin-top:30px; }
+  @media (max-width:760px){ .guardrails-list{ grid-template-columns:1fr; } }
+  .guardrails-list li{ display:flex; align-items:flex-start; gap:12px; color:var(--on-navy); font-size:15px; line-height:1.45; }
+  .guardrails-list li svg{ width:18px; height:18px; flex:none; margin-top:1px; color:var(--on-navy-dim); }
+  .guardrails .signature{ margin-top:30px; padding-top:26px; border-top:1px solid rgba(232,237,244,.14); font-family:var(--serif); font-size:clamp(20px,2.8vw,27px); line-height:1.4; color:#fff; letter-spacing:-0.01em; max-width:40ch; }
+  .guardrails .signature .em{ color:var(--accent); }
+
+  /* ===========================================================
+     SCROLL REVEAL
+     =========================================================== */
+  .reveal{ opacity:0; transform:translateY(18px); transition:opacity .6s var(--ease), transform .6s var(--ease); }
+  .reveal.in{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){ .reveal{ opacity:1; transform:none; transition:none; } }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ====================== NAV ====================== -->
+<header class="nav" id="nav">
+  <div class="container nav-inner">
+    <a href="#top" class="wordmark" aria-label="Provenire — home">Provenire</a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a class="navlink" href="#how">How it works</a>
+      <a class="navlink" href="#benefits">Benefits</a>
+      <a class="navlink" href="#roadmap">Roadmap</a>
+      <a class="navlink" href="#security">Security</a>
+      <a class="navlink" href="#contact">Contact</a>
+    </nav>
+
+    <div class="nav-cta-wrap">
+      <a class="btn btn-primary" href="#contact">Book a demo</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="container">
+      <a class="navlink" href="#how">How it works</a>
+      <a class="navlink" href="#benefits">Benefits</a>
+      <a class="navlink" href="#roadmap">Roadmap</a>
+      <a class="navlink" href="#security">Security</a>
+      <a class="navlink" href="#contact">Contact</a>
+      <a class="btn btn-primary" href="#contact">Book a demo</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<span id="top"></span>
+
+<!-- ====================== HERO ====================== -->
+<section class="hero" aria-labelledby="hero-h">
+  <div class="container">
+    <span class="hero-tag"><span class="dot" aria-hidden="true"></span> AI diligence for M&amp;A deal teams</span>
+    <h1 id="hero-h">Not what's in the data room.<br><span class="accent-line">What changes the price.</span></h1>
+    <p class="subhead">
+      <strong>Provenire ingests the full data room</strong> and returns a prioritized list of diligence findings — risks and quantified cost-out — each cited to the exact document, page, and clause, plus a first-draft IC memo. Benchmarked against comparable deals, including the org and headcount efficiency generic document AI can't see.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-on-navy" href="#contact">Book a demo <span class="btn-arrow" aria-hidden="true">→</span></a>
+      <a class="textlink on-navy" href="#how">See how it works <span class="tl-arrow" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== VALUE PROP ====================== -->
+<section class="valueprop" aria-label="What Provenire does">
+  <div class="container vp-grid">
+    <p>Provenire reads the data room and tells you which findings actually move the price.</p>
+    <p class="vp-aside">
+      Including cost-out you can't see from the documents alone — each one cited back to the exact page. The shift is from <span class="accent-num">finding everything</span> to <span class="accent-num">judging what's material</span>: the few findings worth a partner's attention, with a number you can put in the model.
+    </p>
+  </div>
+</section>
+
+<!-- ====================== PROBLEM ====================== -->
+<section class="band" id="problem" aria-labelledby="problem-h">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">The problem</div>
+      <h2 id="problem-h">A diligence pass is days of reading to find the few things that matter.</h2>
+      <p class="lede">And the part everyone used to pay for — reading the data room and pulling the facts out — is becoming a built-in feature of the data room itself.</p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-callout reveal">
+        <p>Extraction used to be the work. It is becoming a checkbox the buyer already pays for.</p>
+      </div>
+
+      <div>
+        <div class="shift-row">
+          <div class="shift-card reveal">
+            <div class="when">Now standard</div>
+            <h3>VDRs ship their own AI copilots</h3>
+            <p>Virtual data rooms now include <strong>built-in AI assistants</strong> that summarize and extract across the documents — bundled into the subscription the buyer already holds.</p>
+          </div>
+          <div class="shift-card reveal">
+            <div class="when">Emerging</div>
+            <h3>Data rooms are opening up</h3>
+            <p>As VDRs expose programmatic interfaces, <strong>any AI assistant</strong> can plug straight into the data room to summarize and extract, further commoditizing retrieval.</p>
+          </div>
+          <div class="shift-card reveal">
+            <div class="when">The result</div>
+            <h3>"We cite sources" is now free</h3>
+            <p>"We read your data room and cite the source" is <strong>no longer a product</strong>. It's a feature of the platform the deal already runs on.</p>
+          </div>
+        </div>
+
+        <div class="problem-land reveal">
+          <div class="pl-text">Every tool can read your data room now. <span class="em">That was never the hard part.</span></div>
+          <p class="pl-sub">The hard part is judging which findings are material — which clause actually threatens the deal, and what the upside is worth in dollars.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== HOW IT WORKS ====================== -->
+<section id="how" aria-labelledby="how-h">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">How it works</div>
+      <h2 id="how-h">Ingest the data room. Get ranked, cited findings — and a draft IC memo.</h2>
+      <p class="lede">One engine — finding, benchmark, quantified impact, citation — applied from the first read to the committee memo. The receipts travel with every number.</p>
+    </div>
+
+    <ol class="steps">
+      <li class="step reveal">
+        <div class="step-top">
+          <div class="step-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 7c0-1.1 3.6-2 8-2s8 .9 8 2-3.6 2-8 2-8-.9-8-2Z" stroke="currentColor" stroke-width="1.5"/><path d="M4 7v10c0 1.1 3.6 2 8 2s8-.9 8-2V7" stroke="currentColor" stroke-width="1.5"/><path d="M4 12c0 1.1 3.6 2 8 2s8-.9 8-2" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <span class="step-num">Step 1</span>
+        </div>
+        <h3>Ingest the data room</h3>
+        <p>Point Provenire at the full deal corpus — <span class="hl">financials, contracts, the cap table, customer data</span>. Connect securely or upload.</p>
+        <ul class="step-detail">
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Financial statements and working papers</li>
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Contracts, cap table, customer and HR data</li>
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Secure connection or direct upload</li>
+        </ul>
+      </li>
+
+      <li class="step reveal">
+        <div class="step-top">
+          <div class="step-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 19V11M12 19V5M19 19v-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 19h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <span class="step-num">Step 2</span>
+        </div>
+        <h3>Benchmark and score</h3>
+        <p>Provenire scores each finding for <span class="hl">materiality against comparable deals</span> — and benchmarks the target's org and economics against peers.</p>
+        <ul class="step-detail">
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Span of control and management layers</li>
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Headcount-to-revenue and cost-per-FTE</li>
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Scored against comparable-deal medians</li>
+        </ul>
+      </li>
+
+      <li class="step reveal">
+        <div class="step-top">
+          <div class="step-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h8l4 4v14H6V3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 13h6M9 16.5h6M9 9.5h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <span class="step-num">Step 3</span>
+        </div>
+        <h3>Get decision-ready output</h3>
+        <p>A ranked findings list — <span class="hl">risks and quantified cost-out</span> — each cited to document, page, and clause, plus a first-draft IC memo.</p>
+        <ul class="step-detail">
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Ranked by materiality, not volume</li>
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Every finding cited to its source</li>
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> First-draft Investment Committee memo</li>
+        </ul>
+      </li>
+    </ol>
+
+    <!-- OUTPUTS: IC memo as the hero output + the Findings → IC memo → Realized arc -->
+    <div class="outputs">
+      <div class="outputs-head reveal">
+        <h3>The output is a decision the committee can act on — not another pile of extracts.</h3>
+        <span class="illustrative-flag">Illustrative — sample output</span>
+      </div>
+
+      <div class="outputs-grid">
+        <!-- HERO OUTPUT: the IC memo -->
+        <article class="memo-hero reveal" aria-label="Illustrative Investment Committee memo output">
+          <div class="memo-bar" aria-hidden="true"></div>
+          <div class="memo-inner">
+            <div class="memo-doc-head">
+              <span class="md-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h8l4 4v14H6V3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 13h6M9 16.5h6M9 9.5h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </span>
+              <div>
+                <div class="md-kicker">Hero output</div>
+                <h4>A board-ready IC memo</h4>
+              </div>
+              <span class="memo-chip"><span class="tdot" aria-hidden="true"></span> Draft &middot; editable</span>
+            </div>
+
+            <ol class="memo-sections">
+              <li><span class="ms-n" aria-hidden="true">1</span> Thesis &amp; recommendation <span class="ms-cite">cited</span></li>
+              <li><span class="ms-n" aria-hidden="true">2</span> Findings, ranked by materiality <span class="ms-cite">cited</span></li>
+              <li><span class="ms-n" aria-hidden="true">3</span> Quantified synergy &amp; cost-out <span class="ms-cite">cited</span></li>
+              <li><span class="ms-n" aria-hidden="true">4</span> Defensible valuation range <span class="ms-cite">cited</span></li>
+              <li><span class="ms-n" aria-hidden="true">5</span> Risks, mitigants &amp; open items <span class="ms-cite">cited</span></li>
+            </ol>
+
+            <p class="memo-foot">
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11 2.5l2.5 2.5M3 13l.4-2.6L11 3l2 2-7.4 7.6L3 13Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+              Assembled from the findings, not generated free-hand. Every line traces to the data room — edit and sign before it goes to committee.
+            </p>
+          </div>
+        </article>
+
+        <!-- THE ARC: Findings → IC memo → Realized -->
+        <div class="arc reveal">
+          <h4>One engine, end to end</h4>
+          <p class="arc-sub">Finding, benchmark, quantified impact, citation — carried straight through to the output a partner signs.</p>
+          <ol class="arc-steps">
+            <li class="arc-step is-live">
+              <div class="arc-rail" aria-hidden="true"><span class="arc-node"></span><span class="arc-connector"></span></div>
+              <div class="arc-body">
+                <div class="arc-k"><h5>Findings</h5><span class="arc-tag live">Live today</span></div>
+                <p>Ranked, cited, and benchmarked against comparable deals.</p>
+              </div>
+            </li>
+            <li class="arc-step is-hero">
+              <div class="arc-rail" aria-hidden="true"><span class="arc-node"></span><span class="arc-connector dashed"></span></div>
+              <div class="arc-body">
+                <div class="arc-k"><h5>IC memo</h5><span class="arc-tag live">Live today</span></div>
+                <p>A board-ready first draft, assembled only from the findings — editable, every line cited.</p>
+              </div>
+            </li>
+            <li class="arc-step is-next">
+              <div class="arc-rail" aria-hidden="true"><span class="arc-node"></span></div>
+              <div class="arc-body">
+                <div class="arc-k"><h5>Realized</h5><span class="arc-tag next">On the roadmap</span></div>
+                <p>Projected vs. realized value tracked post-close, shown with confidence ranges.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== BENEFITS ====================== -->
+<section class="band" id="benefits" aria-labelledby="benefits-h">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Benefits</div>
+      <h2 id="benefits-h">Materiality, quantified opportunity, and a citation on every line.</h2>
+    </div>
+
+    <!-- 3 pillars -->
+    <div class="pillars">
+      <div class="pillar reveal">
+        <div class="p-ico" aria-hidden="true">
+          <svg viewBox="0 0 42 42" fill="none"><rect x="7" y="9" width="28" height="3.4" rx="1.7" fill="currentColor"/><rect x="7" y="19.3" width="20" height="3.4" rx="1.7" fill="currentColor" opacity="0.55"/><rect x="7" y="29.6" width="12" height="3.4" rx="1.7" fill="currentColor" opacity="0.3"/></svg>
+        </div>
+        <h3>A ranked list, not a wall of flags.</h3>
+        <p>Extraction is now table stakes; the VDR does it too. Provenire scores each finding against comparable deals and surfaces the few material enough to change the price or the structure — so the team reads <strong>"this is the one that matters,"</strong> not 400 highlighted clauses.</p>
+      </div>
+
+      <div class="pillar reveal">
+        <div class="p-ico" aria-hidden="true">
+          <svg viewBox="0 0 42 42" fill="none"><circle cx="21" cy="21" r="14" stroke="currentColor" stroke-width="2.4"/><path d="M21 14.5v13M18 24c0 1.7 1.3 2.6 3 2.6s3-.8 3-2.4c0-3.4-5.8-2.1-5.8-5.2 0-1.5 1.3-2.4 2.8-2.4s2.8.9 2.8 2.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Findings include the upside, in dollars.</h3>
+        <p>Most tools only flag risk. Provenire quantifies the opportunity too — <strong>cost-out and synergy</strong>, from org redesign where span of control and layers run heavy against comparables to duplicated functions and procurement overlap. Each is <strong>a number you can put in the model</strong>, and together they set a defensible valuation range — not another summary to read.</p>
+      </div>
+
+      <div class="pillar reveal">
+        <div class="p-ico" aria-hidden="true">
+          <svg viewBox="0 0 42 42" fill="none"><path d="M21 6l13 4.6v8.4c0 8.2-5.4 13.6-13 16.4-7.6-2.8-13-8.2-13-16.4v-8.4L21 6Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M15 21l4.2 4.2L27.5 16.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Every claim cites the exact source.</h3>
+        <p>No finding stands without a citation to the specific document, page, and clause. Verify any line in seconds before it goes in front of a partner. <strong>Auditability is how Provenire earns trust</strong> — not a disclaimer in the footer.</p>
+      </div>
+    </div>
+
+    <!-- FINDING CARDS -->
+    <div class="findings-wrap">
+      <div class="findings-head reveal">
+        <h3>What a finding looks like</h3>
+        <span class="illustrative-flag">Illustrative — sample output</span>
+      </div>
+
+      <div class="findings-grid">
+        <!-- PRIMARY: OPPORTUNITY -->
+        <article class="finding reveal" aria-label="Illustrative opportunity finding">
+          <div class="finding-top">
+            <span class="tag tag-opp"><span class="tdot" aria-hidden="true"></span> Opportunity</span>
+            <span class="mat high">
+              <span class="mat-label">Materiality</span>
+              <span class="mat-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="mat-value">High</span>
+            </span>
+          </div>
+          <div class="finding-body">
+            <h4>Management structure carries excess layers</h4>
+            <p class="f-desc">Target runs <span class="num">8 management layers</span> at an average span of control of <span class="num">3.1</span>, vs. a comparable-deal median of <span class="num">5.2</span>. Rightsizing toward peer spans removes <span class="num">~1.5 layers</span>.</p>
+
+            <div class="bench" role="img" aria-label="Span of control: target 3.1, comparable-deal median 5.2">
+              <div class="bench-row">
+                <span class="bl">Target span</span>
+                <span class="bench-track"><span class="bench-fill target" style="width:48%"></span></span>
+                <span class="bv">3.1</span>
+              </div>
+              <div class="bench-row">
+                <span class="bl">Peer median</span>
+                <span class="bench-track"><span class="bench-fill peer" style="width:80%"></span></span>
+                <span class="bv">5.2</span>
+              </div>
+            </div>
+
+            <div class="impact">
+              <span class="imp-label">Est. annualized cost-out</span>
+              <span class="imp-value"><span class="accent">$2.4M</span></span>
+              <span class="imp-sub">~14% of managerial cost</span>
+            </div>
+
+            <button type="button" class="source-chip" aria-pressed="false" aria-label="Jump to source: HR_Org_Chart_2025.xlsx tab Headcount rows 12 to 48, and Payroll_Summary.pdf page 7">
+              <span class="sc-ico" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M5 2h4l4 4v8H3V4" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 2v4h4" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="sc-text">
+                <span class="sc-label">Source</span>
+                <span class="sc-ref"><code>HR_Org_Chart_2025.xlsx</code> — tab 'Headcount', rows 12–48; <code>Payroll_Summary.pdf</code> — p.7</span>
+              </span>
+              <span class="sc-jump" aria-hidden="true">
+                <span class="sc-jump-text">Jump to source</span>
+                <svg viewBox="0 0 16 16" fill="none"><path d="M6 3h7v7M13 3L5 11M9 8v5H3V7h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+          </div>
+        </article>
+
+        <!-- SECONDARY: RISK -->
+        <article class="finding secondary reveal" aria-label="Illustrative risk finding">
+          <div class="finding-top">
+            <span class="tag tag-risk"><span class="tdot" aria-hidden="true"></span> Risk</span>
+            <span class="mat high">
+              <span class="mat-label">Materiality</span>
+              <span class="mat-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="mat-value">High</span>
+            </span>
+          </div>
+          <div class="finding-body">
+            <h4>Customer concentration above comparables</h4>
+            <p class="f-desc">Top 3 customers = <span class="num">41% of revenue</span> vs. a comparable-deal median of <span class="num">23%</span>; two contracts include change-of-control consent.</p>
+
+            <div class="impact secondary">
+              <span class="imp-label">Impact</span>
+              <span class="imp-value">Potential price / structure impact</span>
+            </div>
+
+            <button type="button" class="source-chip" aria-pressed="false" aria-label="Jump to source: Customer_Contracts MSA_Acme.pdf page 12, and Rev_by_Customer_2025.xlsx">
+              <span class="sc-ico" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M5 2h4l4 4v8H3V4" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 2v4h4" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="sc-text">
+                <span class="sc-label">Source</span>
+                <span class="sc-ref"><code>Customer_Contracts/</code> — MSA_Acme.pdf p.12; <code>Rev_by_Customer_2025.xlsx</code></span>
+              </span>
+              <span class="sc-jump" aria-hidden="true">
+                <span class="sc-jump-text">Jump to source</span>
+                <svg viewBox="0 0 16 16" fill="none"><path d="M6 3h7v7M13 3L5 11M9 8v5H3V7h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <!-- DEFENSIBLE VALUATION RANGE — an output of the findings, not a model -->
+      <div class="valrange reveal" aria-label="Illustrative defensible valuation range">
+        <div class="valrange-head">
+          <h4>A defensible valuation range — built from the findings, not a model.</h4>
+          <span class="illustrative-flag">Illustrative — sample output</span>
+        </div>
+        <p class="vr-desc">The material findings — quantified cost-out and synergy, plus risk adjustments — roll up into a range you can defend in the room, each input cited to its source. <strong>It is not a DCF or LBO model and does not replace one</strong>; it is the evidence-backed bracket those models get tested against.</p>
+
+        <div class="vr-bar-wrap">
+          <div class="vr-scale" role="img" aria-label="Findings-adjusted valuation range of 7.6 to 8.1 times EBITDA, against a seller ask of 8.6 times.">
+            <span class="vr-track" aria-hidden="true"></span>
+            <span class="vr-band" style="left:30%; width:30%;" aria-hidden="true"></span>
+            <span class="vr-ask" style="left:80%;" aria-hidden="true"></span>
+          </div>
+          <div class="vr-legend">
+            <span class="vrl"><span class="sw band" aria-hidden="true"></span> Findings-adjusted range — <strong>7.6&ndash;8.1&times; EBITDA</strong></span>
+            <span class="vrl"><span class="sw ask" aria-hidden="true"></span> Seller ask — <strong>8.6&times; EBITDA</strong></span>
+          </div>
+        </div>
+
+        <p class="vr-note"><strong>Every input is cited.</strong> The range moves only when a finding moves it — adjust or reject any line and the bracket recomputes. Provenire proposes the range; the deal team owns the number that goes in the model.</p>
+      </div>
+    </div>
+
+    <!-- POSITIONING MAP -->
+    <div class="map-wrap">
+      <div class="map-head reveal">
+        <h3>Where Provenire sits</h3>
+        <p>Extraction is the commodity layer the data room now owns. The judgment layer — materiality and benchmarking against comparable deals — is the part that still has to be built.</p>
+      </div>
+
+      <div class="map-shell reveal">
+        <svg viewBox="0 0 760 540" role="img" aria-labelledby="map-title map-desc">
+          <title id="map-title">Category positioning map</title>
+          <desc id="map-desc">A two-axis map. The horizontal axis runs from "Extracts and summarizes" on the left to "Judges what's material" on the right. The vertical axis runs from "Sees only this deal's documents" at the bottom to "Benchmarked against comparable deals" at the top. VDR AI copilots sit in the bottom left. Document-extraction AI sits lower-middle. Financial DD AI sits in the middle, slightly above center. M and Ai sits in the top right, highlighted.</desc>
+
+          <!-- plot area: x 110..700, y 60..460 -->
+          <!-- grid -->
+          <line class="map-grid-line" x1="110" y1="160" x2="700" y2="160"/>
+          <line class="map-grid-line" x1="110" y1="260" x2="700" y2="260"/>
+          <line class="map-grid-line" x1="110" y1="360" x2="700" y2="360"/>
+          <line class="map-grid-line" x1="257" y1="60" x2="257" y2="460"/>
+          <line class="map-grid-line" x1="405" y1="60" x2="405" y2="460"/>
+          <line class="map-grid-line" x1="552" y1="60" x2="552" y2="460"/>
+
+          <!-- quadrant labels (very subtle) -->
+          <text class="map-quadrant-note" x="125" y="80">Commodity layer</text>
+          <text class="map-quadrant-note" x="560" y="80" text-anchor="start">Judgment layer</text>
+
+          <!-- axes -->
+          <line class="map-axis-line" x1="110" y1="460" x2="710" y2="460"/>
+          <line class="map-axis-line" x1="110" y1="460" x2="110" y2="50"/>
+          <!-- arrowheads -->
+          <path d="M710 460 l-9 -5 v10 z" fill="#cbd3e0"/>
+          <path d="M110 50 l-5 9 h10 z" fill="#cbd3e0"/>
+
+          <!-- axis end labels -->
+          <text class="map-axis-end" x="118" y="478">Extracts &amp; summarizes</text>
+          <text class="map-axis-end" x="700" y="478" text-anchor="end">Judges what's material</text>
+
+          <text class="map-axis-end" x="100" y="455" text-anchor="end" transform="rotate(-90 100 455)" style="text-anchor:start">Sees only this deal's documents</text>
+          <text class="map-axis-end" x="100" y="60" text-anchor="end" transform="rotate(-90 100 60)" style="text-anchor:end">Benchmarked against comparable deals</text>
+
+          <!-- axis titles -->
+          <text class="map-axis-label" x="405" y="508" text-anchor="middle">Materiality →</text>
+
+          <!-- NODES -->
+          <!-- VDR AI copilots : bottom-left -->
+          <g>
+            <circle class="map-dot" cx="185" cy="405" r="6"/>
+            <text class="map-node-label" x="200" y="409">VDR AI copilots</text>
+          </g>
+          <!-- Document-extraction AI : lower-mid -->
+          <g>
+            <circle class="map-dot" cx="300" cy="360" r="6"/>
+            <text class="map-node-label" x="315" y="364">Document-extraction AI</text>
+          </g>
+          <!-- Financial DD AI : mid, slightly up -->
+          <g>
+            <circle class="map-dot" cx="415" cy="280" r="6"/>
+            <text class="map-node-label" x="430" y="284">Financial DD AI</text>
+          </g>
+          <!-- Provenire : top-right highlighted -->
+          <g>
+            <circle class="map-mai-ring" cx="612" cy="135" r="17"/>
+            <circle class="map-mai-ring" cx="612" cy="135" r="26" opacity="0.25"/>
+            <circle class="map-dot mai" cx="612" cy="135" r="8.5"/>
+            <text class="map-node-label mai" x="600" y="108" text-anchor="middle">
+              <tspan>Provenire</tspan>
+            </text>
+          </g>
+        </svg>
+      </div>
+      <p class="map-caption reveal"><strong>Extraction is now the commodity layer.</strong> Materiality and benchmarking are the judgment layer.</p>
+    </div>
+
+    <!-- repeat CTA after benefits -->
+    <div class="reveal" style="margin-top:clamp(44px,6vw,64px); text-align:center;">
+      <a class="btn btn-primary" href="#contact">Book a demo <span class="btn-arrow" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ROADMAP / WHAT'S NEXT ====================== -->
+<section id="roadmap" aria-labelledby="roadmap-h">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Roadmap</div>
+      <h2 id="roadmap-h">The same engine, extended across the deal timeline.</h2>
+      <p class="lede">One engine — finding, benchmark, quantified impact, citation. Here is what runs today and what comes next. Roadmap items are forthcoming, not available today, and listed plainly so you always know where the line is.</p>
+    </div>
+
+    <div class="rm-legend reveal" aria-hidden="true">
+      <span class="rl"><span class="swatch live"></span> Live today</span>
+      <span class="rl"><span class="swatch next"></span> On the roadmap</span>
+    </div>
+
+    <p class="rm-group-label reveal">Live today</p>
+    <div class="rm-now">
+      <div class="rm-card now reveal">
+        <span class="rm-status"><span class="tdot" aria-hidden="true"></span> Live</span>
+        <h4>Materiality-ranked findings</h4>
+        <p>Risks and opportunities scored against comparable deals — each cited to document, page, and clause.</p>
+      </div>
+      <div class="rm-card now reveal">
+        <span class="rm-status"><span class="tdot" aria-hidden="true"></span> Live</span>
+        <h4>Org &amp; cost benchmarking</h4>
+        <p>Span of control, management layers, headcount-to-revenue, and cost-per-FTE against peer deals — the view generic document AI cannot reach.</p>
+      </div>
+      <div class="rm-card now reveal">
+        <span class="rm-status"><span class="tdot" aria-hidden="true"></span> Live</span>
+        <h4>First-draft IC memo</h4>
+        <p>A board-ready draft assembled only from the findings, editable, with every line cited back to the data room.</p>
+      </div>
+    </div>
+
+    <p class="rm-group-label reveal">On the roadmap</p>
+    <div class="rm-next">
+      <div class="rm-card next reveal">
+        <span class="rm-status">Forthcoming</span>
+        <h4>QoE &amp; financial-DD support</h4>
+        <p>Quality-of-earnings and financial-diligence findings, cited to the workpapers — built to inform the analysis, never to sign off on it.</p>
+      </div>
+      <div class="rm-card next reveal">
+        <span class="rm-status">Forthcoming</span>
+        <h4>Commercial &amp; HR/comp benchmarking</h4>
+        <p>Customer, pricing, and compensation benchmarks against comparable deals, extending the org view across the full operating model.</p>
+      </div>
+      <div class="rm-card next reveal">
+        <span class="rm-status">Forthcoming</span>
+        <h4>LOI-supporting findings</h4>
+        <p>Findings organized to inform the letter of intent. Provenire informs the LOI — it never drafts or negotiates it.</p>
+      </div>
+      <div class="rm-card next reveal">
+        <span class="rm-status">Forthcoming</span>
+        <h4>Synergy realization tracking</h4>
+        <p>Projected vs. realized value tracked after close, shown with confidence ranges — so the committee sees what landed against what was modeled.</p>
+      </div>
+    </div>
+
+    <!-- WHAT Provenire DOESN'T DO — the boundary as a trust signal -->
+    <div class="guardrails reveal">
+      <div class="g-head">
+        <div class="g-eyebrow">Boundaries</div>
+        <h3>What Provenire doesn't do.</h3>
+        <p class="g-sub">The boundary is part of the product. Provenire sharpens the judgment behind the decision; it does not take the actions that require a signature, a mandate, or a model of record.</p>
+      </div>
+      <ul class="guardrails-list">
+        <li><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 9h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Build the DCF or LBO model</li>
+        <li><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 9h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Draft the CIM or teaser</li>
+        <li><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 9h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Author or negotiate the LOI or SPA</li>
+        <li><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 9h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Make regulatory filings</li>
+        <li><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 9h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Run financing or closing</li>
+        <li><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 9h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Execute post-merger integration</li>
+      </ul>
+      <p class="signature">Provenire proposes the number and shows its work. <span class="em">A human signs it.</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== OBJECTIONS ====================== -->
+<section id="questions" aria-labelledby="q-h">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Questions deal teams ask</div>
+      <h2 id="q-h">The questions a skeptic asks first.</h2>
+    </div>
+
+    <div class="accordion" id="accordion">
+      <!-- (d) featured first for prominence -->
+      <div class="acc-item featured">
+        <h3 style="margin:0;">
+          <button class="acc-trigger" aria-expanded="true" aria-controls="acc-panel-1" id="acc-btn-1">
+            <span class="acc-q">Isn't this just what my data room already does now?</span>
+            <span class="acc-feat-tag">The core question</span>
+            <span class="acc-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+          </button>
+        </h3>
+        <div class="acc-panel" id="acc-panel-1" role="region" aria-labelledby="acc-btn-1">
+          <div class="acc-panel-inner">
+            <p>Your VDR answers <strong>"what's in here?"</strong> Provenire answers <strong>"what's material, and what's it worth?"</strong> A VDR can find every change-of-control clause; it can't tell you which one actually threatens the deal — it has no benchmark of comparable deals — and it never sees org structure to quantify cost-out. Extraction is the commodity layer the VDR owns; materiality and org benchmarking are the judgment layer it structurally can't reach. We sit on top of the data room, not against it.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <h3 style="margin:0;">
+          <button class="acc-trigger" aria-expanded="false" aria-controls="acc-panel-2" id="acc-btn-2">
+            <span class="acc-q">Can I trust the numbers?</span>
+            <span class="acc-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+          </button>
+        </h3>
+        <div class="acc-panel" id="acc-panel-2" role="region" aria-labelledby="acc-btn-2">
+          <div class="acc-panel-inner">
+            <p>Built around <strong>citations, not generation</strong>: every finding links to the source document, page, and clause, so you can verify any line in seconds. A faster, benchmarked first pass you sign off on — <strong>not an autopilot</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <h3 style="margin:0;">
+          <button class="acc-trigger" aria-expanded="false" aria-controls="acc-panel-3" id="acc-btn-3">
+            <span class="acc-q">How is our deal data handled?</span>
+            <span class="acc-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+          </button>
+        </h3>
+        <div class="acc-panel" id="acc-panel-3" role="region" aria-labelledby="acc-btn-3">
+          <div class="acc-panel-inner">
+            <p>Today it runs <strong>locally</strong>: documents are parsed and stored on your own machine, scoped per deal, and the only data leaving it is the retrieved chunks sent to the model for a given call. Production controls (encryption at rest, authentication, access control, audit logging) are <strong>not yet implemented</strong>, and the repository says so explicitly. Treat it as a prototype, not a system of record.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <h3 style="margin:0;">
+          <button class="acc-trigger" aria-expanded="false" aria-controls="acc-panel-4" id="acc-btn-4">
+            <span class="acc-q">My associates already do this.</span>
+            <span class="acc-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+          </button>
+        </h3>
+        <div class="acc-panel" id="acc-panel-4" role="region" aria-labelledby="acc-btn-4">
+          <div class="acc-panel-inner">
+            <p>They do, and a first pass costs <strong>days of associate time</strong>, much of it spent reading to find the few things that matter. Provenire does that first pass fast so the team judges instead of hunts, and adds org and cost benchmarking against comparables that headcount has <strong>no dataset to run</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== SECURITY ====================== -->
+<section class="navy" id="security" aria-labelledby="sec-h">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Security &amp; trust</div>
+      <h2 id="sec-h">What is built, and what is not.</h2>
+      <p class="lede">
+        Provenire is a working prototype, so the honest version matters more than
+        the reassuring one. Below is what the code does today, followed by what
+        would have to be built before real deal data goes near it.
+      </p>
+    </div>
+
+    <div class="sec-grid">
+      <div class="sec-card reveal">
+        <div class="s-ico" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="8" y="11" width="11" height="9" rx="2" stroke="currentColor" stroke-width="2"/><rect x="21" y="20" width="11" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M13.5 20v3M26.5 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Per-deal data separation</h3>
+        <p>Documents, chunks, and findings are <strong>scoped to their own deal</strong> in the schema, and retrieval only ever reads the chunks belonging to the deal being analyzed.</p>
+      </div>
+
+      <div class="sec-card reveal">
+        <div class="s-ico" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="2"/><path d="M14 20l4 4 8-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 7v3M20 30v3M33 20h-3M10 20H7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Runs locally; nothing is retained remotely</h3>
+        <p>Documents are parsed and stored <strong>on your own machine</strong>. The only data leaving it is the retrieved chunks sent to the model API for a given analysis call.</p>
+      </div>
+
+      <div class="sec-card reveal">
+        <div class="s-ico" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none"><path d="M20 6l12 4.3v8.1c0 7.6-5 12.7-12 15.3-7-2.6-12-7.7-12-15.3v-8.1L20 6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 20l3.8 3.8L26 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Not yet built: production controls</h3>
+        <p><strong>Encryption at rest, authentication, access control, and audit logging are not implemented.</strong> They would be required, along with a formal compliance program, before any real client data touches this. No badge is claimed that has not been earned.</p>
+      </div>
+
+      <div class="sec-card reveal">
+        <div class="s-ico" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none"><path d="M12 6h11l5 5v23H12V6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M23 6v5h5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 22h8M16 27h8M16 17h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>A full audit trail on every finding</h3>
+        <p>Each output carries a <strong>per-finding citation</strong> — document, page, and clause — so every claim traces back to your own documents. Auditability by construction.</p>
+      </div>
+    </div>
+
+    <p class="sec-note">Stated precisely, without embellishment: Provenire is a local prototype. Data stays on the machine running it, and the repository documents exactly which production security controls are absent. Treat it as a demo, not as a system of record for live deals.</p>
+  </div>
+</section>
+
+<!-- ====================== PROJECT STATUS ====================== -->
+<!--
+  This replaces a placeholder "social proof" band (logo slots + specimen quotes).
+  Provenire has no customers or design partners yet, so no logos, testimonials,
+  or traction figures are claimed anywhere on this page.
+-->
+<section class="band" id="status" aria-labelledby="status-h">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Project status</div>
+      <h2 id="status-h">A working prototype, not yet a company.</h2>
+      <p class="lede">
+        Provenire is an independently built, functioning implementation of the
+        pipeline described above: it ingests real documents, retrieves per
+        category, produces grounded findings, enforces the review gate, and
+        assembles a memo. It has no customers, no design partners, and no
+        traction to report, and nothing on this page claims otherwise.
+      </p>
+      <p class="lede" style="margin-top:14px;">
+        The source is public, including the analysis prompts and the code that
+        enforces citation grounding.
+        <a class="textlink" href="https://github.com/tbuica-droid/provenire" style="margin-left:6px;">
+          Read the code on GitHub <span class="tl-arrow" aria-hidden="true">→</span>
+        </a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== CONTACT / FOUNDER / FORM ====================== -->
+<section id="contact" aria-labelledby="contact-h">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Contact</div>
+      <h2 id="contact-h">See Provenire run on a deal like yours.</h2>
+    </div>
+
+    <div class="contact-grid">
+      <!-- founder -->
+      <div class="founder-card reveal">
+        <div class="founder-id">
+          <div class="founder-avatar" aria-hidden="true">TB</div>
+          <div>
+            <div class="f-name">Tomas Buica</div>
+            <div class="f-title">Built and maintains Provenire</div>
+          </div>
+        </div>
+        <!--
+          TODO (Tomas): replace the line below with one sentence of your own
+          background. Keep it factual; this page deliberately makes no claims
+          that cannot be verified.
+        -->
+        <p class="founder-bio">
+          I built Provenire end to end: document parsing and retrieval, the
+          grounded-findings pipeline, the review gate, and the memo assembly
+          and export.
+        </p>
+
+        <div class="founder-contact">
+          <div class="fc-label">Elsewhere</div>
+          <a href="https://github.com/tbuica-droid/provenire">GitHub</a>
+        </div>
+      </div>
+
+      <!-- form -->
+      <div class="form-card reveal">
+        <p class="form-intro">Tell us about a recent deal and we'll show you Provenire's findings and benchmark output on a comparable engagement. No prep required from your team.</p>
+
+        <!--
+          BACKEND: replace this client-side handler with a POST to your endpoint (e.g., /api/demo)
+          or a form service (Formspree/HubSpot). Notifications currently route nowhere; wire to email/CRM.
+        -->
+        <form id="demoForm" novalidate>
+          <div class="field-row">
+            <div class="field" id="f-name">
+              <label for="in-name">Full name <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="in-name" name="name" autocomplete="name" required aria-required="true" aria-describedby="err-name" />
+              <span class="err-msg" id="err-name">Please enter your name.</span>
+            </div>
+            <div class="field" id="f-email">
+              <label for="in-email">Work email <span class="req" aria-hidden="true">*</span></label>
+              <input type="email" id="in-email" name="email" autocomplete="email" required aria-required="true" aria-describedby="err-email" />
+              <span class="err-msg" id="err-email">Please enter a valid work email.</span>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field" id="f-firm">
+              <label for="in-firm">Firm <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="in-firm" name="firm" autocomplete="organization" required aria-required="true" aria-describedby="err-firm" />
+              <span class="err-msg" id="err-firm">Please enter your firm.</span>
+            </div>
+            <div class="field" id="f-role">
+              <label for="in-role">Role <span class="req" aria-hidden="true">*</span></label>
+              <select id="in-role" name="role" required aria-required="true" aria-describedby="err-role">
+                <option value="" selected disabled>Select…</option>
+                <option>Associate</option>
+                <option>VP</option>
+                <option>Principal</option>
+                <option>Partner</option>
+                <option>Corp Dev</option>
+                <option>Advisory/Accounting</option>
+              </select>
+              <span class="err-msg" id="err-role">Please select your role.</span>
+            </div>
+          </div>
+
+          <div class="field" id="f-deals">
+            <label for="in-deals">Deals per year</label>
+            <select id="in-deals" name="deals">
+              <option value="" selected disabled>Select…</option>
+              <option>1–3</option>
+              <option>4–7</option>
+              <option>8+</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="in-deal">Tell us about a recent deal <span style="color:var(--slate-light); font-weight:500;">(optional)</span></label>
+            <textarea id="in-deal" name="dealNote" placeholder="Sector, rough size, what you'd want to see Provenire surface…"></textarea>
+          </div>
+
+          <p class="form-submit-error" id="formError" role="alert"></p>
+          <button type="submit" class="btn btn-primary">Book a demo <span class="btn-arrow" aria-hidden="true">→</span></button>
+          <p class="form-foot">No prep required from your team. We'll reach out within one business day.</p>
+        </form>
+
+        <!-- confirmation -->
+        <div class="form-confirm" id="formConfirm" role="status" aria-live="polite" tabindex="-1">
+          <div class="fc-check" aria-hidden="true">
+            <svg viewBox="0 0 26 26" fill="none"><path d="M5 13.5l5 5L21 7.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Thanks — we've got it.</h3>
+          <p>A member of our team will reach out within one business day to schedule your walkthrough.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ====================== FOOTER ====================== -->
+<footer aria-labelledby="footer-h">
+  <h2 id="footer-h" class="sr-only">Footer</h2>
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <a href="#top" class="wordmark on-dark" aria-label="Provenire — home">Provenire</a>
+        <p class="footer-tag">AI due diligence that judges what's material — and cites every line back to the data room.</p>
+      </div>
+
+      <div class="footer-right">
+        <span class="fr-label">Get in touch</span>
+        <a href="#contact">Book a demo</a>
+        <a href="https://github.com/tbuica-droid/provenire">Source on GitHub</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 Provenire</span>
+      <span class="fb-note">Provenire is a working prototype, not a commercial product. Sample findings shown on this page are illustrative, drawn from a fictional deal. Production security controls are not yet implemented.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Nav: scrolled state ---------- */
+  var nav = document.getElementById('nav');
+  var onScroll = function(){
+    if(window.scrollY > 8){ nav.classList.add('scrolled'); }
+    else{ nav.classList.remove('scrolled'); }
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive:true });
+
+  /* ---------- Mobile menu ---------- */
+  var toggle = document.getElementById('navToggle');
+  var menu = document.getElementById('mobileMenu');
+  toggle.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+  // close mobile menu when a link is tapped
+  menu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){
+      menu.classList.remove('open');
+      toggle.setAttribute('aria-expanded','false');
+      toggle.setAttribute('aria-label','Open menu');
+    });
+  });
+
+  /* ---------- Accordion (accessible, keyboard-operable) ---------- */
+  var triggers = Array.prototype.slice.call(document.querySelectorAll('.acc-trigger'));
+  function setPanel(btn, expand){
+    var panel = document.getElementById(btn.getAttribute('aria-controls'));
+    btn.setAttribute('aria-expanded', String(expand));
+    if(expand){
+      panel.style.maxHeight = panel.scrollHeight + 'px';
+    } else {
+      panel.style.maxHeight = '0px';
+    }
+  }
+  triggers.forEach(function(btn){
+    // init: respect the one marked expanded in markup
+    var initiallyOpen = btn.getAttribute('aria-expanded') === 'true';
+    setPanel(btn, initiallyOpen);
+
+    btn.addEventListener('click', function(){
+      var isOpen = btn.getAttribute('aria-expanded') === 'true';
+      setPanel(btn, !isOpen);
+    });
+  });
+  // keep open panels sized correctly on resize
+  var resizeTimer;
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){
+      triggers.forEach(function(btn){
+        if(btn.getAttribute('aria-expanded') === 'true'){
+          var panel = document.getElementById(btn.getAttribute('aria-controls'));
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+        }
+      });
+    }, 120);
+  });
+
+  /* ---------- Source chips (illustrative affordance) ---------- */
+  document.querySelectorAll('.source-chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      var pressed = chip.getAttribute('aria-pressed') === 'true';
+      chip.setAttribute('aria-pressed', String(!pressed));
+    });
+  });
+
+  /* ---------- Demo form: validate + submit ----------
+     To receive submissions, create a form at https://formspree.io (free tier),
+     then paste its endpoint below, e.g.:
+       var FORM_ENDPOINT = 'https://formspree.io/f/abcdwxyz';
+     While this is empty the form still validates and confirms, but nothing is
+     transmitted and a warning is logged to the console. */
+  var FORM_ENDPOINT = '';
+
+  var form = document.getElementById('demoForm');
+  var confirm = document.getElementById('formConfirm');
+  var formError = document.getElementById('formError');
+  var submitBtn = form.querySelector('button[type="submit"]');
+
+  function showError(fieldId, show){
+    var f = document.getElementById(fieldId);
+    if(f){ f.classList.toggle('invalid', show); }
+  }
+  function validEmail(v){
+    // reasonable email check
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    var name = document.getElementById('in-name');
+    var email = document.getElementById('in-email');
+    var firm = document.getElementById('in-firm');
+    var role = document.getElementById('in-role');
+
+    var ok = true;
+    var firstInvalid = null;
+
+    var nameBad = name.value.trim() === '';
+    showError('f-name', nameBad);
+    if(nameBad){ ok = false; firstInvalid = firstInvalid || name; }
+
+    var emailBad = !validEmail(email.value.trim());
+    showError('f-email', emailBad);
+    if(emailBad){ ok = false; firstInvalid = firstInvalid || email; }
+
+    var firmBad = firm.value.trim() === '';
+    showError('f-firm', firmBad);
+    if(firmBad){ ok = false; firstInvalid = firstInvalid || firm; }
+
+    var roleBad = role.value === '';
+    showError('f-role', roleBad);
+    if(roleBad){ ok = false; firstInvalid = firstInvalid || role; }
+
+    if(!ok){
+      if(firstInvalid){ firstInvalid.focus(); }
+      return;
+    }
+
+    var payload = {
+      name: name.value.trim(),
+      email: email.value.trim(),
+      firm: firm.value.trim(),
+      role: role.value,
+      deals: document.getElementById('in-deals').value,
+      dealNote: document.getElementById('in-deal').value.trim()
+    };
+
+    function succeed(){
+      form.style.display = 'none';
+      confirm.classList.add('show');
+      confirm.focus();
+    }
+    function fail(msg){
+      formError.textContent = msg;
+      formError.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.removeAttribute('aria-busy');
+    }
+
+    // Not configured yet: keep the page usable rather than silently dropping
+    // the submission on the floor.
+    if(!FORM_ENDPOINT){
+      console.warn('[provenire] FORM_ENDPOINT is not set; submission was not sent.');
+      succeed();
+      return;
+    }
+
+    formError.style.display = 'none';
+    submitBtn.disabled = true;
+    submitBtn.setAttribute('aria-busy','true');
+
+    fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(res){
+      if(res.ok){ succeed(); }
+      else { fail('Something went wrong sending that. Please try again, or reach out via GitHub.'); }
+    })
+    .catch(function(){
+      fail('Network error. Please try again, or reach out via GitHub.');
+    });
+  });
+
+  /* ---------- Scroll reveal (respects reduced motion) ---------- */
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var revealEls = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+  if(reduce || !('IntersectionObserver' in window)){
+    revealEls.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin:'0px 0px -8% 0px', threshold:0.08 });
+    revealEls.forEach(function(el){ io.observe(el); });
+  }
+})();
+</script>
+</body>
+</html>
