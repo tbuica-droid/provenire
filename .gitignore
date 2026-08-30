@@ -35,3 +35,9 @@
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# agent tooling
+.claude/
+.claude-flow/
+CLAUDE.md
+AGENTS.md
